@@ -13,6 +13,7 @@ const User = sequelize.define('user', {
         type: Sequelize.STRING,
         unique: true
     },
+    // TODO encriptar?
     password: Sequelize.STRING,
     name: Sequelize.STRING,
     createdAt: Sequelize.DATE,
