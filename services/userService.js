@@ -1,5 +1,3 @@
-const express = require('express');
-
 const User = require('../models/user');
 
 exports.registerService = async (req, res) => {
@@ -8,10 +6,14 @@ exports.registerService = async (req, res) => {
     const password = req.body.password;
     // TODO manejar confirm password en el front
     const confirmPassword = req.body.confirmPassword;
-    // TODO verificar formato email
     if (!name || !email || !password) {
         console.log("Name, email or password missing");
         return res.status(400).send("Name, email or password missing");
+    }
+    let emailIsValid = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
+    if(!emailIsValid) {
+        console.log("invalid email");
+        return res.status(400).send("Invalid email");
     }
     if (password !== confirmPassword) {
         console.log("Password does not match confirmed password");
@@ -22,14 +24,13 @@ exports.registerService = async (req, res) => {
         console.log("Email already associated with an account");
         return res.status(400).send("Email already associated with an account");
     }
-    await User.create({
+    let user = await User.create({
         name,
         email,
         password
     });
     console.log("created user " + name);
-    // TODO mandar info con json
-    res.redirect('/');
+    return res.status(201).send(user.toJSON())
 }
 
 exports.loginService = async (req, res) => {
@@ -50,6 +51,6 @@ exports.loginService = async (req, res) => {
     }
     if(user.password === password) {
         // TODO mandar info con json
-        res.redirect('/')
+        return res.status(201).send(user.toJSON())
     }
 }
