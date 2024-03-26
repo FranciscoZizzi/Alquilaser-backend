@@ -17,7 +17,7 @@ exports.registerService = async (req, res) => {
         console.log("Password does not match confirmed password");
         return res.status(400).send("Password does not match confirmed password");
     }
-    let existingUser = await User.findOne({where: email});
+    let existingUser = await User.findOne({where: {email}});
     if (existingUser != null) {
         console.log("Email already associated with an account");
         return res.status(400).send("Email already associated with an account");
@@ -28,6 +28,7 @@ exports.registerService = async (req, res) => {
         password
     });
     console.log("created user " + name);
+    // TODO mandar info con json
     res.redirect('/');
 }
 
@@ -38,18 +39,17 @@ exports.loginService = async (req, res) => {
         console.log('Email or password is missing');
         return res.status(400).send('Email or password is missing');
     }
-    User.findOne({ where: email}).then(
-        user => {
-            if(user == null) {
-                console.log('User not found');
-                return res.status(404).send('User not found');
-            }
-            if(user.password !== password) {
-                console.log('Incorrect password');
-                return res.status(401).send('Incorrect password');
-            }
-            if(user.password === password) {
-                res.redirect('/')
-            }
-        }).catch(err => console.log(err));
+    let user = await User.findOne({where: {email}});
+    if(user == null) {
+        console.log('User not found');
+        return res.status(404).send('User not found');
+    }
+    if(user.password !== password) {
+        console.log('Incorrect password');
+        return res.status(401).send('Incorrect password');
+    }
+    if(user.password === password) {
+        // TODO mandar info con json
+        res.redirect('/')
+    }
 }
