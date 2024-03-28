@@ -4,16 +4,26 @@ const bodyParser = require('body-parser');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const cors = require('cors');
 
 const app = express();
+app.use(cors());
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+// Serve static files from the Alquilaser directory (frontend)
+app.use(express.static(path.join(__dirname, '..', 'Alquilaser')));
 
+// Body parser middleware for handling POST requests
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// Routes
+app.use('/api', indexRouter); // Example API route
+app.use('/api/users', usersRouter); // Example users API route
 
-module.exports = app;
+// Start the server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+module.exports = app
