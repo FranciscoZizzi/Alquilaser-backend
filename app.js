@@ -2,8 +2,7 @@ const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const config = require('./config/config.json');
-const { Sequelize } = require('sequelize');
-
+const Sequelize = require('sequelize');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const cors = require('cors');
@@ -11,18 +10,9 @@ const cors = require('cors');
 const app = express();
 app.use(cors());
 
-// Database configuration
-const { database, username, password, host, dialect } = config.development;
-const sequelize = new Sequelize(database, username, password, {
-    host: host,
-    dialect: dialect
-});
+const sequelize = require("./util/database")
 
-// Import models
-const User = require('./models/user')(sequelize, Sequelize);
-const Listing = require('./models/listing')(sequelize, Sequelize);
-const Booking = require('./models/booking')(sequelize, Sequelize);
-const Image = require('./models/image')(sequelize, Sequelize);
+const { User, Listing, Image, Booking } = require('./models');
 
 sequelize.sync({ force: true })
     .then(() => {
@@ -32,19 +22,29 @@ sequelize.sync({ force: true })
         console.error('Error syncing database:', err);
     });
 
-// Serve static files from the Alquilaser directory (frontend)
 app.use(express.static(path.join(__dirname, '..', 'Alquilaser')));
 
-// Body parser middleware for handling POST requests
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Routes
-app.use('/api', indexRouter); // Example API route
-app.use('/api/users', usersRouter); // Example users API route
+app.use('/api', indexRouter);
+app.use('/api/users', usersRouter);
 
-// Start the server
 const PORT = process.env.PORT || 3000;
+
+process.on('SIGINT', async () => {
+    console.log('Received SIGINT signal. Dropping tables and closing server...');
+    try {
+        await sequelize.drop();
+        console.log('All tables dropped successfully.');
+        await sequelize.close();
+        console.log('Sequelize connection closed.');
+        process.exit(0);
+    } catch (error) {
+        console.error('Error occurred while dropping tables or closing connection:', error);
+        process.exit(1);
+    }
+});
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

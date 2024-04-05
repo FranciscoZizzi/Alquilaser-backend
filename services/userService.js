@@ -21,6 +21,7 @@ exports.registerService = async (req, res) => {
         // TODO devolver JSON
         return res.status(400).send("Password does not match confirmed password");
     }
+
     let existingUser = await User.findOne({where: {email}});
     if (existingUser != null) {
         console.log("Email already associated with an account");
