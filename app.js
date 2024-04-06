@@ -5,6 +5,7 @@ const config = require('./config/config.json');
 const Sequelize = require('sequelize');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
+const listingsRouter = require('./routes/listings')
 const cors = require('cors');
 
 const app = express();
@@ -29,6 +30,7 @@ app.use(bodyParser.json());
 
 app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/listings', listingsRouter);
 
 const PORT = process.env.PORT || 3000;
 

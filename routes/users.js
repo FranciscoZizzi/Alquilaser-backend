@@ -20,4 +20,10 @@ router.get('/login', function(req, res) {
 
 router.post('/login', loginService);
 
+router.get('/login', function(req, res) {
+    res.render('login');
+});
+
+router.post('/login', loginService);
+
 module.exports = router;
