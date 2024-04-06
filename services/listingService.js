@@ -31,20 +31,17 @@ exports.editListingService = async (req, res) => {
         const listingID = req.params.listingID;
         const { title, price, description, damage, listingState } = req.body;
 
-        // Find the existing listing
         let listing = await Listing.findByPk(listingID);
         if (!listing) {
             return res.status(404).json({ message: "Listing not found" });
         }
 
-        // Update the listing fields
         listing.title = title;
         listing.price = price;
         listing.description = description;
         listing.damage = damage;
         listing.listingState = listingState;
 
-        // Save the updated listing
         await listing.save();
 
         console.log("Listing updated:", listing.title);

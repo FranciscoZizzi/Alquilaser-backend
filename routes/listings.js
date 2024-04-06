@@ -1,13 +1,13 @@
 var express = require('express');
 var router = express.Router();
 
-const { addListingService, editListingSerivce } = require('../services/listingService');
+const { addListingService, editListingService } = require('../services/listingService');
 
 
 
 router.post('/add', addListingService);
 
-//router.put('/:listingID', editListingSerivce);
+router.put('/edit/:listingID', editListingService);
 
 
 
