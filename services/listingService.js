@@ -51,3 +51,23 @@ exports.editListingService = async (req, res) => {
         return res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
+
+exports.deleteListingService = async (req, res) => {
+    try {
+        const listingID = req.params.listingID;
+
+        const listing = await Listing.findByPk(listingID);
+        if (!listing) {
+            return res.status(404).json({ message: "Listing not found" });
+        }
+
+        await listing.destroy();
+
+        console.log("Listing deleted:", listingID);
+        return res.status(200).json({ message: "Listing deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting listing:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
