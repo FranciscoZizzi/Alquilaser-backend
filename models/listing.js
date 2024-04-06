@@ -2,7 +2,7 @@ const Sequelize = require('sequelize');
 const sequelize = require('../util/database');
 
 const Listing = sequelize.define('Listing', {
-    part_name: Sequelize.STRING,
+    title: Sequelize.STRING,
     price: Sequelize.INTEGER,
     description: Sequelize.STRING,
     damage: Sequelize.STRING,
