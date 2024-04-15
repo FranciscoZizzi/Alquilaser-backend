@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const jwt = require("jsonwebtoken");
 
 exports.registerService = async (req, res) => {
     const name = req.body.name;
@@ -33,8 +34,30 @@ exports.registerService = async (req, res) => {
         email,
         password
     });
+    let token;
+    try {
+        token = jwt.sign(
+            {
+                userId: user.user_id,
+                email: user.email
+            },
+            process.env.JWT_SECRET,
+            {expiresIn: "24h"}
+        );
+    } catch (err) {
+        console.log(err);
+        return res.send("jwt error");
+    }
     console.log("created user " + name);
-    return res.status(201).send(user.toJSON())
+
+    return res.status(201).json({
+        success: true,
+        data: {
+            userId: user.user_id,
+            email: user.email,
+            token: token,
+        },
+    });
 }
 
 exports.loginService = async (req, res) => {
@@ -56,7 +79,46 @@ exports.loginService = async (req, res) => {
         // TODO devolver JSON
         return res.status(401).send('Incorrect password');
     }
-    if(user.password === password) {
-        return res.status(201).send(user.toJSON())
+    let token;
+    try {
+        token = jwt.sign(
+            {
+                userId: user.user_id,
+                email: user.email
+            },
+            process.env.JWT_SECRET,
+            {expiresIn: "24h"}
+        );
+    } catch (err) {
+        console.log(err);
+        return res.send("jwt error");
     }
+    return res.status(200).json({
+        success: true,
+        data: {
+            userId: user.user_id,
+            email: user.email,
+            token: token,
+        },
+    });
+}
+
+exports.decodeToken = (req, res) => {
+    const token = req.headers.authorization.split(' ')[1];
+    if(!token) {
+        res.status(200).json({
+            success: false,
+            message: "Token not provided"
+        });
+    }
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    res.status(200).json(
+        {
+            success: true,
+            data: {
+                userId: decodedToken.userId,
+                email: decodedToken.email
+            }
+        }
+    );
 }
