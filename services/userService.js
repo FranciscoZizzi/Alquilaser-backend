@@ -1,6 +1,8 @@
 const User = require('../models/user');
 const jwt = require("jsonwebtoken");
 
+const jwtExpiresIn = '24h';
+
 exports.registerService = async (req, res) => {
     const name = req.body.name;
     const email = req.body.email;
@@ -42,7 +44,7 @@ exports.registerService = async (req, res) => {
                 email: user.email
             },
             process.env.JWT_SECRET,
-            {expiresIn: "24h"}
+            {expiresIn: jwtExpiresIn}
         );
     } catch (err) {
         console.log(err);
@@ -87,7 +89,7 @@ exports.loginService = async (req, res) => {
                 email: user.email
             },
             process.env.JWT_SECRET,
-            {expiresIn: "24h"}
+            {expiresIn: jwtExpiresIn}
         );
     } catch (err) {
         console.log(err);
