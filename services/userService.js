@@ -11,6 +11,11 @@ exports.registerService = async (req, res) => {
     const confirmPassword = req.body.confirmPassword;
     if (!name || !email || !password) {
         console.log("Name, email or password missing");
+        error = {
+            message: "Name, email or password missing",
+            code: "MISSING_PARAMS",
+            
+        }
         return res.status(400).send("Name, email or password missing");
     }
     let emailIsValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
