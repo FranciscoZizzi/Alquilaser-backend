@@ -109,7 +109,7 @@ exports.loginService = async (req, res) => {
         },
     });
 }
-
+// hacer middleware que se llama antes de cada endpoint
 exports.decodeToken = (req, res) => {
     const token = req.headers.authorization.split(' ')[1];
     if(!token) {
