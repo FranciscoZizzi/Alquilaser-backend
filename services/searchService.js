@@ -11,15 +11,10 @@ exports.searchByTitle = async (req, res) => {
 }
 
 exports.searchByPrice = async (req, res) => {
-    const searchTerm = req.body.searchTerm;
     const priceFilterMax = req.body.priceFilterMax;
     const priceFilterMin = req.body.priceFilterMin;
-    if(!searchTerm){
-        return res.status(400).send('Not found')
-    }
     let listings = await Listing.findAll({
         where: {
-            title: {[Op.like]: '%' + searchTerm + '%'},
             price: {
                 [Op.gte]: priceFilterMin,
                 [Op.lte]: priceFilterMax,
@@ -30,11 +25,6 @@ exports.searchByPrice = async (req, res) => {
 }
 
 exports.searchByListingState = async (req, res) => {
-    const searchTerm = req.body.searchTerm;
-    const stateFilter = req.body.stateFilter
-    if(!searchTerm){
-        return res.status(400).send('Not found')
-    }
     let listings = await Listing.findAll({
         where: {
             title: {[Op.like]: '%' + searchTerm + '%'},
