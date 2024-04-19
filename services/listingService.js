@@ -1,7 +1,13 @@
 const Listing = require('../models/listing');
+const {authenticationService} = require("./authenticationService");
 
 
 exports.addListingService = async (req, res) => {
+    // TODO esto va a tirar error porque en el front hay que enviar el token
+    const authData = await authenticationService(req, res);
+    if (!authData.success) {
+        return res.status(401).send("Unauthorized/not logged in")
+    }
     const { title, price, description, damage, listingState } = req.body;
 
     if (!title || !price || !description || !damage || !listingState) {
@@ -19,8 +25,8 @@ exports.addListingService = async (req, res) => {
         price,
         description,
         damage,
-        listing_state: listingState
-        //TODO snake_case / camelCase?
+        listing_state: listingState,
+        user_id: authData.data.userId
     });
     console.log("created listing " + title);
     return res.status(201).send(listing.toJSON())
