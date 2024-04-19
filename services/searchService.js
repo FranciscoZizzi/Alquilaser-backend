@@ -1,45 +1,42 @@
 const Listing = require('../models/listing');
 const {Op} = require("sequelize");
 
-exports.searchByTitle = async (req, res) => {
-    const searchTerm = req.body.searchTerm;
-    if (!searchTerm) {
-        return res.status(400).send("womp womp")
+exports.filteredSearch = async (req, res) => {
+    let priceFilterMin = req.body.min;
+    let priceFilterMax = req.body.max;
+    let searchTerm = req.body.searchTerm;
+    let listings = []
+    if (priceFilterMin == null) {
+        priceFilterMin = '0';
     }
-    let listings = await Listing.findAll({where: {title: {[Op.like]: '%' + searchTerm + '%'}}});
-    return res.send(listings)
-}
-
-exports.searchByPrice = async (req, res) => {
-    const searchTerm = req.body.searchTerm;
-    const priceFilterMax = req.body.priceFilterMax;
-    const priceFilterMin = req.body.priceFilterMin;
-    if(!searchTerm){
-        return res.status(400).send('Not found')
+    if (searchTerm == null) {
+        searchTerm = '';
     }
-    let listings = await Listing.findAll({
-        where: {
-            title: {[Op.like]: '%' + searchTerm + '%'},
-            price: {
-                [Op.gte]: priceFilterMin,
-                [Op.lte]: priceFilterMax,
+    if (priceFilterMax != null) {
+        listings = await Listing.findAll({
+            where: {
+                title: {
+                    [Op.like]: '%' + searchTerm + '%'
+                },
+                price: {
+                    [Op.gte]: priceFilterMin,
+                    [Op.lte]: priceFilterMax,
+                }
             }
-        }
-    })
-    return res.send(listings)
-}
-
-exports.searchByListingState = async (req, res) => {
-    const searchTerm = req.body.searchTerm;
-    const stateFilter = req.body.stateFilter
-    if(!searchTerm){
-        return res.status(400).send('Not found')
+        });
+        return res.send(listings)
     }
-    let listings = await Listing.findAll({
-        where: {
-            title: {[Op.like]: '%' + searchTerm + '%'},
-            listing_state: {[Op.like]:stateFilter}
-        }
-    })
-    return res.send(listings)
+    if (priceFilterMax == null) {
+        listings = await Listing.findAll({
+            where: {
+                title: {
+                    [Op.like]: '%' + searchTerm + '%'
+                },
+                price: {
+                    [Op.gte]: priceFilterMin,
+                }
+            }
+        });
+        return res.send(listings)
+    }
 }

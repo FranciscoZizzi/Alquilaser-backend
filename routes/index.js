@@ -1,5 +1,5 @@
 var express = require('express');
-const {searchByTitle} = require("../services/searchService");
+const {searchByTitle, filteredSearch} = require("../services/searchService");
 const {searchByPrice, searchByListingState} = require("../services/searchService");
 var router = express.Router();
 
@@ -8,9 +8,7 @@ router.get('/', function(req, res, next) {
   res.render('index');
 });
 
-router.post('/search', searchByTitle);
+router.post('/search', filteredSearch);
 
-router.post('/search',searchByPrice);
-router.post('/search',searchByListingState);
 
 module.exports = router;
