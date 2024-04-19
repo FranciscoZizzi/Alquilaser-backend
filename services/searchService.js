@@ -6,10 +6,12 @@ exports.filteredSearch = async (req, res) => {
     let priceFilterMax = req.body.max;
     let searchTerm = req.body.searchTerm;
     let listings = []
+    if (priceFilterMin == null) {
+        priceFilterMin = '0';
+    }
     if (searchTerm == null) {
         searchTerm = '';
     }
-    // PriceFilterMin no puede ser nulo porque el front lo cambia a un 0 si lo es
     if (priceFilterMax != null) {
         listings = await Listing.findAll({
             where: {
