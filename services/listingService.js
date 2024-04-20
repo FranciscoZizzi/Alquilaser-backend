@@ -32,7 +32,7 @@ exports.addListingService = async (req, res) => {
         description,
         damage: "no",
         listing_state: "available",
-        // user_id: authData.data.userId
+        user_id: authData.data.userId
     });
     console.log("created listing " + title);
     return res.status(201).json({
