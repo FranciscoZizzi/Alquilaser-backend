@@ -13,6 +13,11 @@ exports.authenticationService = async (req, res) => {
         };
     }
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    if(!decodedToken.userId || decodedToken.email) {
+        return {
+            success:false,
+        };
+    }
     return {
         success: true,
         data: {
