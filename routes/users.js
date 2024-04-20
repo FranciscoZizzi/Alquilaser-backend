@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-const { registerService, loginService, profileService } = require('../services/userService');
+const { registerService, loginService, profileService, updateProfilePicService } = require('../services/userService');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -13,5 +13,7 @@ router.post('/register', registerService);
 router.post('/login', loginService);
 
 router.get('/profile', profileService);
+
+router.put('/profile', updateProfilePicService);
 
 module.exports = router;
