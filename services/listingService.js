@@ -7,8 +7,7 @@ exports.addListingService = async (req, res) => {
     const authData = await authenticationService(req, res);
     if (!authData.success) {
         console.log("Not logged in")
-        return res.status(401).json({
-            success: false,
+        return res.status(401).send({
             message: "Not logged in"
         })
     }
@@ -16,16 +15,14 @@ exports.addListingService = async (req, res) => {
 
     if (!title || !price || !description) {
         console.log('Some field is missing');
-        return res.status(400).json({
-            success: false,
+        return res.status(400).send({
             message: "Some field is missing"
         });
     }
     let existingListing = await Listing.findOne({where: {title}});
     if (existingListing != null) {
         console.log("There is already a publication with that title");
-        return res.status(400).json({
-            success: false,
+        return res.status(400).send({
             message: "There is already a publication with that title"
         });
     }
@@ -51,8 +48,7 @@ exports.editListingService = async (req, res) => {
 
         let listing = await Listing.findByPk(listingID);
         if (!listing) {
-            return res.status(404).json({
-                success: false,
+            return res.status(404).send({
                 message: "Listing not found"
             });
         }
@@ -72,8 +68,7 @@ exports.editListingService = async (req, res) => {
         });
     } catch (error) {
         console.error("Error updating listing:", error);
-        return res.status(500).json({
-            success: false,
+        return res.status(500).send({
             message: "Internal Server Error"
         });
     }
@@ -86,8 +81,7 @@ exports.deleteListingService = async (req, res) => {
 
         const listing = await Listing.findByPk(listingID);
         if (!listing) {
-            return res.status(404).json({
-                success: false,
+            return res.status(404).send({
                 message: "Listing not found"
             });
         }
@@ -101,8 +95,7 @@ exports.deleteListingService = async (req, res) => {
         });
     } catch (error) {
         console.error("Error deleting listing:", error);
-        return res.status(500).json({
-            success: false,
+        return res.status(500).send({
             message: "Internal Server Error"
         });
     }
