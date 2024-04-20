@@ -6,13 +6,13 @@ exports.filteredSearch = async (req, res) => {
     let priceMaxFilter = req.query.priceMaxFilter;
     let searchTerm = req.body.searchTerm;
     let listings = []
-    if (priceMinFilter == null) {
+    if (priceMinFilter == null || priceMinFilter === '') {
         priceMinFilter = '0';
     }
     if (searchTerm == null) {
         searchTerm = '';
     }
-    if (priceMaxFilter != null) {
+    if (priceMaxFilter != null &&  priceMaxFilter !== '') {
         listings = await Listing.findAll({
             where: {
                 title: {
@@ -26,7 +26,7 @@ exports.filteredSearch = async (req, res) => {
         });
         return res.send(listings)
     }
-    if (priceMaxFilter == null) {
+    if (priceMaxFilter == null  || priceMaxFilter === '') {
         listings = await Listing.findAll({
             where: {
                 title: {
