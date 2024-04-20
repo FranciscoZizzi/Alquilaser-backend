@@ -104,7 +104,7 @@ exports.deleteListingService = async (req, res) => {
 exports.getListingById = async (req, res) => {
     const listingId = req.params.id;
     if (!listingId) {
-        res.status(404).send("Listing not found");
+        return res.status(404).send({message:"User not found"});
     }
     let listing = await Listing.findOne({where: {id: listingId}});
     return listing ? res.send(listing) : res.status(404).send({message:"Listing not found"});
