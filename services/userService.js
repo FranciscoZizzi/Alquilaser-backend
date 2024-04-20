@@ -1,5 +1,7 @@
 const User = require('../models/user');
+const Listing = require('../models/listing');
 const jwt = require("jsonwebtoken");
+const { authenticationService } = require("./authenticationService")
 
 const jwtExpiresIn = '24h';
 
@@ -109,23 +111,25 @@ exports.loginService = async (req, res) => {
         },
     });
 }
-// hacer middleware que se llama antes de cada endpoint
-exports.decodeToken = (req, res) => {
-    const token = req.headers.authorization.split(' ')[1];
-    if(!token) {
-        res.status(200).json({
-            success: false,
-            message: "Token not provided"
-        });
+
+exports.profileService = async (req, res) => {
+    let authData = await authenticationService(req, res);
+    if (!authData.success) {
+        res.status(401).send("user not authenticated");
     }
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-    res.status(200).json(
-        {
-            success: true,
-            data: {
-                userId: decodedToken.userId,
-                email: decodedToken.email
-            }
+    let user = await User.findOne({where:{
+        user_id: authData.data.userId,
+        }});
+    let listings = await Listing.findAll({where: {
+        user_id: user.user_id
+        }});
+    // TODO agregar historial de alquileres
+    res.status(200).json({
+        success: true,
+        data: {
+            name: user.name,
+            profile_pic: user.profile_pic,
+            listings: listings
         }
-    );
+    });
 }
