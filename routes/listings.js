@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 const { addListingService, editListingService, deleteListingService } = require('../services/listingService');
-const {getListingById} = require("../services/searchService");
+const {getListingById} = require("../services/listingService");
 
 
 
