@@ -9,9 +9,4 @@ const Listing = sequelize.define('Listing', {
     listing_state: Sequelize.STRING
 }, { freezeTableName: true });
 
-Listing.associate = models => {
-    Listing.hasMany(models.Image);
-    Listing.hasMany(models.Booking);
-};
-
 module.exports = Listing;

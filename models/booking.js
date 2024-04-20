@@ -10,9 +10,4 @@ const Booking = sequelize.define('Booking', {
     extra_fees: Sequelize.INTEGER
 }, { freezeTableName: true });
 
-Booking.associate = models => {
-    Booking.belongsTo(models.User);
-    Booking.belongsTo(models.Listing);
-};
-
 module.exports = Booking;
