@@ -41,10 +41,11 @@ exports.filteredSearch = async (req, res) => {
     }
 }
 
-exports.getListingById = (req, res) => {
+exports.getListingById = async (req, res) => {
     const listingId = req.params.id;
     if (!listingId) {
         res.status(404).send("Listing not found");
     }
-
+    let listing = await Listing.findOne({where: {id: listingId}});
+    return listing ? res.send(listing) : res.status(404).send("Listing not found");
 }
