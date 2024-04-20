@@ -15,7 +15,7 @@ const sequelize = require("./util/database")
 
 const { User, Listing, Image, Booking } = require('./models');
 
-sequelize.sync({ force: true })
+sequelize.sync({ force: false })
     .then(() => {
         console.log('Database synced successfully');
     })
