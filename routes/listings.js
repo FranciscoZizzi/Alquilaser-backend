@@ -8,7 +8,7 @@ const {getListingById} = require("../services/listingService");
 
 router.post('/add', addListingService);
 
-router.get('/:id', getListingById)
+router.get('/get/:id', getListingById)
 
 router.put('/edit/:listingID', editListingService);
 
