@@ -2,41 +2,40 @@ const Listing = require('../models/listing');
 const {Op} = require("sequelize");
 
 exports.filteredSearch = async (req, res) => {
-    let priceFilterMin = req.body.min;
-    let priceFilterMax = req.body.max;
+    let priceMinFilter = req.query.priceMinFilter;
+    let priceMaxFilter = req.query.priceMaxFilter;
     let searchTerm = req.body.searchTerm;
     let listings = []
-    if (priceFilterMin == null) {
-        priceFilterMin = '0';
+    if (priceMinFilter == null) {
+        priceMinFilter = '0';
     }
     if (searchTerm == null) {
         searchTerm = '';
     }
-    if (priceFilterMax != null) {
+    if (priceMaxFilter != null) {
         listings = await Listing.findAll({
             where: {
                 title: {
                     [Op.like]: '%' + searchTerm + '%'
                 },
                 price: {
-                    [Op.gte]: priceFilterMin,
-                    [Op.lte]: priceFilterMax,
+                    [Op.gte]: priceMinFilter,
+                    [Op.lte]: priceMaxFilter,
                 }
             }
         });
         return res.send(listings)
     }
-    if (priceFilterMax == null) {
+    if (priceMaxFilter == null) {
         listings = await Listing.findAll({
             where: {
                 title: {
                     [Op.like]: '%' + searchTerm + '%'
                 },
                 price: {
-                    [Op.gte]: priceFilterMin,
+                    [Op.gte]: priceMinFilter,
                 }
             }
         });
         return res.send(listings)
     }
-}
