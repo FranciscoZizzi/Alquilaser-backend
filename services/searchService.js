@@ -47,5 +47,5 @@ exports.getListingById = async (req, res) => {
         res.status(404).send("Listing not found");
     }
     let listing = await Listing.findOne({where: {id: listingId}});
-    return listing ? res.send(listing) : res.status(404).send("Listing not found");
+    return listing ? res.send(listing) : res.status(404).send({message:"Listing not found"});
 }
