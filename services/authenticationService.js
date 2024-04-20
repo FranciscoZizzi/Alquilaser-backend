@@ -9,10 +9,6 @@ exports.authenticationService = async (req, res) => {
                 message: "Token not provided"
             }
         };
-        // res.status(401).json({
-        //     success: false,
-        //     message: "Token not provided"
-        // });
     }
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     return {
@@ -22,13 +18,4 @@ exports.authenticationService = async (req, res) => {
             email: decodedToken.email
         }
     };
-    // res.status(200).json(
-    //     {
-    //         success: true,
-    //         data: {
-    //             userId: decodedToken.userId,
-    //             email: decodedToken.email
-    //         }
-    //     }
-    // );
 }

@@ -18,25 +18,36 @@ exports.registerService = async (req, res) => {
             code: "MISSING_PARAMS",
             
         }
-        return res.status(400).send("Name, email or password missing");
+        return res.status(400).json({
+            success: false,
+            message: "Name, email or password missing"
+        });
     }
     let emailIsValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
     if(!emailIsValid) {
         console.log("invalid email");
         // TODO devolver JSON
-        return res.status(400).send("Invalid email");
+        return res.status(400).json({
+            success: false,
+            message: "Invalid email"
+        });
     }
     if (password !== confirmPassword) {
         console.log("Password does not match confirmed password");
-        // TODO devolver JSON
-        return res.status(400).send("Password does not match confirmed password");
+        return res.status(400).json({
+            success: false,
+            message: "Password does not match confirmed password"
+        });
     }
 
     let existingUser = await User.findOne({where: {email}});
     if (existingUser != null) {
         console.log("Email already associated with an account");
         // TODO devolver JSON
-        return res.status(400).send("Email already associated with an account");
+        return res.status(400).json({
+            success: false,
+            message: "Email already associated with an account"
+        });
     }
     let user = await User.create({
         name,
@@ -55,7 +66,10 @@ exports.registerService = async (req, res) => {
         );
     } catch (err) {
         console.log(err);
-        return res.send("jwt error");
+        return res.json({
+            success: false,
+            message: "Jwt token error"
+        });
     }
     console.log("created user " + name);
 
@@ -74,20 +88,24 @@ exports.loginService = async (req, res) => {
     let password = req.body.password;
     if (!email || !password) {
         console.log('Email or password is missing');
-        // TODO devolver JSON
-        return res.status(400).send('Email or password is missing');
+        return res.status(400).json({
+            success: false,
+            message: 'Email or password is missing'
+        });
     }
     let user = await User.findOne({where: {email}});
     if(user == null) {
         console.log('User not found');
-        // TODO devolver JSON
-        return res.status(404).send('User not found');
-    }
+        return res.status(400).json({
+            success: false,
+            message: 'User not found'
+        });    }
     if(user.password !== password) {
         console.log('Incorrect password');
-        // TODO devolver JSON
-        return res.status(401).send('Incorrect password');
-    }
+        return res.status(401).json({
+            success: false,
+            message: 'Incorrect password'
+        });    }
     let token;
     try {
         token = jwt.sign(
@@ -100,7 +118,10 @@ exports.loginService = async (req, res) => {
         );
     } catch (err) {
         console.log(err);
-        return res.send("jwt error");
+        return res.json({
+            success: false,
+            message: "Jwt token error"
+        });
     }
     return res.status(200).json({
         success: true,
