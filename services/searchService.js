@@ -39,3 +39,4 @@ exports.filteredSearch = async (req, res) => {
         });
         return res.send(listings)
     }
+}
