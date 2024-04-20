@@ -170,3 +170,12 @@ exports.updateProfilePicService = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+exports.getUserById = async (req, res) => {
+    const userId = req.params.id;
+    if (!userId) {
+        return res.status(404).send({message:"User not found"});
+    }
+    let user = await User.findOne({where: {user_id: userId}});
+    return user ? res.send(user) : res.status(404).send({message:"User not found"});
+}
