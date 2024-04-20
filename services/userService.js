@@ -127,7 +127,7 @@ exports.loginService = async (req, res) => {
 exports.profileService = async (req, res) => {
     let authData = await authenticationService(req, res);
     if (!authData.success) {
-        res.status(401).send("user not authenticated");
+        return res.status(401).send("user not authenticated");
     }
     let user = await User.findOne({where:{
         user_id: authData.data.userId,
