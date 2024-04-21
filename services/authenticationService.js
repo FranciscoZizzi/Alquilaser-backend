@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/user")
 
 exports.authenticationService = async (req, res) => {
     if (!req.headers.authorization) {
@@ -18,6 +19,13 @@ exports.authenticationService = async (req, res) => {
             success:false,
         };
     }
+    let user = await User.findOne({where: {user_id: decodedToken.userId}})
+    if (!user) {
+        return {
+            success:false,
+        };
+    }
+    console.log(user)
     return {
         success: true,
         data: {

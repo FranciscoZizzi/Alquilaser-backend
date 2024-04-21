@@ -139,9 +139,7 @@ exports.profileService = async (req, res) => {
     if (!authData.success) {
         return res.status(401).send("user not authenticated");
     }
-    let user = await User.findOne({where:{
-        user_id: authData.data.userId,
-        }});
+    let user = await User.findByPk(authData.data.userId);
     let listings = await Listing.findAll({where: {
         user_id: user.user_id
         }});
@@ -164,7 +162,6 @@ exports.updateProfilePicService = async (req, res) => {
     if (!authData.success) {
         return res.status(401).json({ error: 'User not authenticated' });
     }
-
     upload.single('profile_pic')(req, res, async (err) => {
         if (err instanceof multer.MulterError) {
             console.error('Multer error:', err);
@@ -193,3 +190,11 @@ exports.updateProfilePicService = async (req, res) => {
     });
 };
 
+exports.getUserById = async (req, res) => {
+    const userId = req.params.id;
+    if (!userId) {
+        return res.status(404).send({message:"User not found"});
+    }
+    let user = await User.findByPk(userId);
+    return user ? res.send(user) : res.status(404).send({message:"User not found"});
+}

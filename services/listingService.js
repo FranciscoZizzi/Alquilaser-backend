@@ -1,3 +1,4 @@
+const User = require('../models/user');
 const Listing = require('../models/listing');
 const {authenticationService} = require("./authenticationService");
 
@@ -32,7 +33,7 @@ exports.addListingService = async (req, res) => {
         description,
         damage: "no",
         listing_state: "available",
-        // user_id: authData.data.userId
+        user_id: authData.data.userId
     });
     console.log("created listing " + title);
     return res.status(201).json({
@@ -100,3 +101,24 @@ exports.deleteListingService = async (req, res) => {
         });
     }
 };
+
+exports.getListingById = async (req, res) => {
+    const listingId = req.params.id;
+    if (!listingId) {
+        return res.status(404).send({message:"User not found"});
+    }
+    let listing = await Listing.findByPk(listingId);
+    if (!listing) {
+        return res.status(404).send({message:"Listing not found"});
+    }
+    let owner = await User.findByPk(listing.user_id)
+    let result = {
+        title: listing.title,
+        price: listing.price,
+        description: listing.description,
+        damage: listing.damage,
+        listing_state: listing.listing_state,
+        owner: owner.name
+    }
+    return res.send(result);
+}
