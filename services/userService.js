@@ -2,6 +2,8 @@ const User = require('../models/user');
 const Listing = require('../models/listing');
 const jwt = require("jsonwebtoken");
 const { authenticationService } = require("./authenticationService")
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 const jwtExpiresIn = '24h';
 
@@ -103,7 +105,7 @@ exports.loginService = async (req, res) => {
         token = jwt.sign(
             {
                 userId: user.user_id,
-                email: user.email
+                email: user.email,
             },
             process.env.JWT_SECRET,
             {expiresIn: jwtExpiresIn}
@@ -114,20 +116,28 @@ exports.loginService = async (req, res) => {
             message: "Jwt token error"
         });
     }
+
+    let profilePic = null;
+    if (user.profile_pic != null) {
+        profilePic = user.profile_pic
+    }
+
     return res.status(200).json({
         success: true,
         data: {
             userId: user.user_id,
             email: user.email,
             token: token,
+            profilePic: user.profile_pic
         },
     });
 }
 
+
 exports.profileService = async (req, res) => {
     let authData = await authenticationService(req, res);
     if (!authData.success) {
-        res.status(401).send("user not authenticated");
+        return res.status(401).send("user not authenticated");
     }
     let user = await User.findOne({where:{
         user_id: authData.data.userId,
@@ -136,7 +146,7 @@ exports.profileService = async (req, res) => {
         user_id: user.user_id
         }});
     // TODO agregar historial de alquileres
-    res.status(200).json({
+    return res.status(200).json({
         success: true,
         data: {
             name: user.name,
@@ -146,27 +156,40 @@ exports.profileService = async (req, res) => {
     });
 }
 
+const fs = require('fs');
+
+
 exports.updateProfilePicService = async (req, res) => {
     let authData = await authenticationService(req, res);
     if (!authData.success) {
         return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    if (!req.body.profile_pic) {
-        return res.status(400).json({ error: 'No profile picture provided' });
-    }
-
-    try {
-        const user = await User.findOne({ where: { user_id: authData.data.userId } });
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+    upload.single('profile_pic')(req, res, async (err) => {
+        if (err instanceof multer.MulterError) {
+            console.error('Multer error:', err);
+            return res.status(400).json({ error: 'Error uploading profile picture' });
+        } else if (err) {
+            console.error('Unknown error:', err);
+            return res.status(500).json({ error: 'Internal server error' });
         }
 
-        await user.update({ profile_pic: req.body.profile_pic });
+        try {
+            const user = await User.findOne({ where: { user_id: authData.data.userId } });
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
 
-        return res.status(200).json({ message: 'Profile picture updated successfully' });
-    } catch (error) {
-        console.error('Error updating profile picture:', error);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
+            const profilePicPath = req.file.path;
+            const profilePicBuffer = fs.readFileSync(profilePicPath);
+
+            await user.update({ profile_pic: profilePicBuffer });
+            fs.unlinkSync(profilePicPath);
+            return res.status(200).json({ message: 'Profile picture updated successfully' });
+        } catch (error) {
+            console.error('Error updating profile picture:', error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    });
 };
+
