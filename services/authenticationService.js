@@ -13,7 +13,14 @@ exports.authenticationService = async (req, res) => {
             success:false,
         };
     }
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    let decodedToken;
+    try {
+        decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (e) {
+        return {
+            success:false
+        }
+    }
     if(!decodedToken || !decodedToken.userId || !decodedToken.email) {
         return {
             success:false,
