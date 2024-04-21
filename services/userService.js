@@ -52,7 +52,7 @@ exports.registerService = async (req, res) => {
     try {
         token = jwt.sign(
             {
-                userId: user.user_id,
+                userId: user.id,
                 email: user.email
             },
             process.env.JWT_SECRET,
@@ -69,7 +69,7 @@ exports.registerService = async (req, res) => {
     return res.status(201).json({
         success: true,
         data: {
-            userId: user.user_id,
+            userId: user.id,
             email: user.email,
             token: token,
         },
@@ -102,7 +102,7 @@ exports.loginService = async (req, res) => {
     try {
         token = jwt.sign(
             {
-                userId: user.user_id,
+                userId: user.id,
                 email: user.email
             },
             process.env.JWT_SECRET,
@@ -117,7 +117,7 @@ exports.loginService = async (req, res) => {
     return res.status(200).json({
         success: true,
         data: {
-            userId: user.user_id,
+            userId: user.id,
             email: user.email,
             token: token,
         },
@@ -130,10 +130,10 @@ exports.profileService = async (req, res) => {
         return res.status(401).send("user not authenticated");
     }
     let user = await User.findOne({where:{
-        user_id: authData.data.userId,
+        id: authData.data.userId,
         }});
     let listings = await Listing.findAll({where: {
-        user_id: user.user_id
+        id: user.id
         }});
     // TODO agregar historial de alquileres
     res.status(200).json({
@@ -157,7 +157,7 @@ exports.updateProfilePicService = async (req, res) => {
     }
 
     try {
-        const user = await User.findOne({ where: { user_id: authData.data.userId } });
+        const user = await User.findOne({ where: { id: authData.data.userId } });
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -176,6 +176,6 @@ exports.getUserById = async (req, res) => {
     if (!userId) {
         return res.status(404).send({message:"User not found"});
     }
-    let user = await User.findOne({where: {user_id: userId}});
+    let user = await User.findOne({where: {id: userId}});
     return user ? res.send(user) : res.status(404).send({message:"User not found"});
 }

@@ -5,12 +5,8 @@ const Booking = require('./booking');
 const sequelize = require("../util/database");
 
 User.hasMany(Booking);
-User.hasMany(Listing, {
-    foreignKey: 'user_id'
-});
-Listing.belongsTo(User, {
-    foreignKey: 'user_id'
-});
+User.hasMany(Listing);
+Listing.belongsTo(User);
 Listing.hasMany(Image);
 Listing.hasMany(Booking);
 Booking.belongsTo(User);
