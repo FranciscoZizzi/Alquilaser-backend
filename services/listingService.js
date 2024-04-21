@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Listing = require('../models/listing');
+const Booking = require('../models/booking');
 const {authenticationService} = require("./authenticationService");
 
 
@@ -121,4 +122,17 @@ exports.getListingById = async (req, res) => {
         owner: owner.name
     }
     return res.send(result);
+}
+
+exports.getListingBookings = async (req, res) => {
+    const listingId = req.params.id;
+    if (!listingId) {
+        return res.status(404).send({message:"Listing not found"});
+    }
+    let listing = await Listing.findByPk(listingId);
+    if (!listing) {
+        return res.status(404).send({message:"Listing not found"});
+    }
+    let bookings = await Booking.findAll({where: {listing_id: listingId}});
+    return res.send(bookings);
 }
