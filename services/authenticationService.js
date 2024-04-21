@@ -25,7 +25,6 @@ exports.authenticationService = async (req, res) => {
             success:false,
         };
     }
-    console.log(user)
     return {
         success: true,
         data: {
