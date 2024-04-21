@@ -19,8 +19,7 @@ exports.authenticationService = async (req, res) => {
             success:false,
         };
     }
-    console.log(decodedToken)
-    let user = await User.findOne({where: {id: decodedToken.userId}})
+    let user = await User.findOne({where: {user_id: decodedToken.userId}})
     if (!user) {
         return {
             success:false,
