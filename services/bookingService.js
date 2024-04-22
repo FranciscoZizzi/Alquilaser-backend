@@ -2,6 +2,7 @@ const User = require('../models/user');
 const Listing = require('../models/listing');
 const Booking = require('../models/booking');
 const {authenticationService} = require("./authenticationService");
+const {log} = require("debug");
 
 exports.makeBooking = async (req, res) => {
     const listingId = req.body.listingId;
@@ -19,6 +20,15 @@ exports.makeBooking = async (req, res) => {
     if (!listing) {
         return res.status(404).send("listing not found");
     }
+
+    if(!startDate || !endDate){
+        return res.status(401).send({message: "Select booking dates first"});
+    }
+
+    if(listing.dataValues.user_id === userId){
+        return res.status(401).send({message: "you cannot book your own listing"});
+    }
+
     let booking = await Booking.create({
         start_date: startDate,
         end_date: endDate,
