@@ -5,7 +5,6 @@ const {authenticationService} = require("./authenticationService");
 
 
 exports.addListingService = async (req, res) => {
-    // TODO esto va a tirar error porque en el front hay que enviar el token
     const authData = await authenticationService(req, res);
     if (!authData.success) {
         console.log("Not logged in")
@@ -45,26 +44,35 @@ exports.addListingService = async (req, res) => {
 
 exports.editListingService = async (req, res) => {
     try {
-        const listingID = req.params.listingID;
-        const { title, price, description, damage, listingState } = req.body;
+        const authData = await authenticationService(req, res);
+        if (!authData.success) {
+            console.log("Not logged in")
+            return res.status(401).send({
+                message: "Not logged in"
+            })
+        }
+        const listingId = req.params.id;
+        const { title, rate, description } = req.body;
 
-        let listing = await Listing.findByPk(listingID);
+        let listing = await Listing.findByPk(listingId);
         if (!listing) {
             return res.status(404).send({
                 message: "Listing not found"
             });
         }
 
+        if (listing.user_id !== authData.data.userId) {
+            return res.status(401).send({message: "Modifying listing not allowed"})
+        }
+
         listing.title = title;
-        listing.price = price;
+        listing.price = rate;
         listing.description = description;
-        listing.damage = damage;
-        listing.listingState = listingState;
 
         await listing.save();
 
         console.log("Listing updated:", listing.title);
-        return res.status(200).json({
+        return res.status(200).send({
             success: true,
             data: listing
         });
