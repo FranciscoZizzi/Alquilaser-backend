@@ -198,6 +198,11 @@ exports.getListingById = async (req, res) => {
     const listing_images = await Image.findAll({
         where: { listing_id: listingId }
     });
+    let mapImages = listing_images.map(image => ({
+        id: image.id,
+        data: image.image_data
+    }))
+    console.log(mapImages)
 
     let result = {
         title: listing.title,
@@ -206,10 +211,7 @@ exports.getListingById = async (req, res) => {
         damage: listing.damage,
         listing_state: listing.listing_state,
         owner: owner.name,
-        images: listing_images.map(image => ({
-            id: image.id,
-            data: image.image_data
-        }))
+        images: mapImages
     }
     return res.send(result);
 }
