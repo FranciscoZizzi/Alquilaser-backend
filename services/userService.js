@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const { authenticationService } = require("./authenticationService")
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
-
+const fs = require('fs');
 const jwtExpiresIn = '24h';
 
 exports.registerService = async (req, res) => {
@@ -149,6 +149,7 @@ exports.profileService = async (req, res) => {
         user_id: user.user_id
         }})
     // TODO agregar historial de alquileres
+
     return res.status(200).json({
         success: true,
         data: {
@@ -160,7 +161,7 @@ exports.profileService = async (req, res) => {
     });
 }
 
-const fs = require('fs');
+
 
 
 exports.updateProfilePicService = async (req, res) => {
