@@ -8,9 +8,9 @@ exports.makeBooking = async (req, res) => {
     const startDate = req.body.startDate;
     const endDate = req.body.endDate;
 
-    let authData = authenticationService(req, res);
+    let authData = await authenticationService(req, res);
     if (!authData.success) {
-        return res.status(401).send("user not authenticated");
+        return res.status(401).send({message: "user not authenticated"});
     }
 
     const userId = authData.data.userId;
@@ -26,5 +26,11 @@ exports.makeBooking = async (req, res) => {
         user_id: userId,
         // TODO price se podría manejar en el front
     })
+    console.log({
+        start_date: startDate,
+        end_date: endDate,
+        listing_id: listingId,
+        user_id: userId,
+    });
     res.send(booking);
 }

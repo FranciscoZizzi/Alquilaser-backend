@@ -3,3 +3,5 @@ const {makeBooking} = require("../services/bookingService");
 var router = express.Router();
 
 router.post('/add', makeBooking);
+
+module.exports = router;
