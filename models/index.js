@@ -4,8 +4,12 @@ const Image = require('./image');
 const Booking = require('./booking');
 const sequelize = require("../util/database");
 
-User.hasMany(Booking);
-Booking.belongsTo(User);
+User.hasMany(Booking, {
+    foreignKey: 'user_id'
+});
+Booking.belongsTo(User, {
+    foreignKey: 'user_id'
+});
 
 User.hasMany(Listing, {
     foreignKey: 'user_id'

@@ -14,9 +14,9 @@ router.get('/get/:id', getListingById);
 
 router.get('/bookings/:id', getListingBookings);
 
-router.put('/edit/:listingID', editListingService);
+router.put('/edit/:id', editListingService);
 
-router.delete('/delete/:listingID', deleteListingService);
+router.delete('/delete/:id', deleteListingService);
 
 
 
