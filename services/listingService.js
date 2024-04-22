@@ -16,7 +16,6 @@ exports.addListingImagesService = async (req, res) => {
                 console.error('Unknown error:', err);
                 return res.status(500).json({error: 'Internal server error'});
             }
-
             const authData = await authenticationService(req, res);
             if (!authData.success) {
                 console.log("Not logged in");
@@ -26,7 +25,7 @@ exports.addListingImagesService = async (req, res) => {
             }
 
             // Assuming you have the listing ID from the request or another source
-            const listingId = req.body.listing_id;
+            const listingId = req.params.listingID;
             const listing = await Listing.findByPk(listingId);
 
             if (!listing) {
