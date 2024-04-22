@@ -1,6 +1,66 @@
 const User = require('../models/user');
 const Listing = require('../models/listing');
 const {authenticationService} = require("./authenticationService");
+const multer = require('multer');
+const fs = require('fs');
+const Image = require('../models/Image');
+const upload = multer({ dest: 'uploads/' });
+
+exports.addListingImagesService = async (req, res) => {
+    try {
+        upload.any()(req, res, async (err) => {
+            if (err instanceof multer.MulterError) {
+                console.error('Multer error:', err);
+                return res.status(400).json({error: 'Error uploading listing images'});
+            } else if (err) {
+                console.error('Unknown error:', err);
+                return res.status(500).json({error: 'Internal server error'});
+            }
+
+            const authData = await authenticationService(req, res);
+            if (!authData.success) {
+                console.log("Not logged in");
+                return res.status(401).send({
+                    message: "Not logged in"
+                });
+            }
+
+            // Assuming you have the listing ID from the request or another source
+            const listingId = req.body.listing_id;
+            const listing = await Listing.findByPk(listingId);
+
+            if (!listing) {
+                return res.status(404).send({
+                    message: "Listing not found"
+                });
+            }
+
+            // Handle uploaded files
+            if (req.files && req.files.length > 0) {
+                for (const file of req.files) {
+                    const listingPicPath = file.path;
+                    const listingPicBuffer = fs.readFileSync(listingPicPath);
+                    // Directly set the listing_id on the image before saving
+                    const image = await Image.create({ image_data: listingPicBuffer, listing_id: listingId });
+                    fs.unlinkSync(listingPicPath);
+                }
+            }
+
+            console.log("Created listing: " + listing.title);
+            return res.status(201).json({
+                success: true,
+                data: listing
+            });
+        });
+    } catch (error) {
+        console.error('Error adding listing:', error);
+        return res.status(500).send({
+            message: "Internal server error"
+        });
+    }
+};
+
+
 
 
 exports.addListingService = async (req, res) => {
@@ -38,9 +98,13 @@ exports.addListingService = async (req, res) => {
     console.log("created listing " + title);
     return res.status(201).json({
         success: true,
-        data: listing
+        data: {
+            ...listing,
+            listing_id: listing.id
+        }
     })
 }
+
 
 exports.editListingService = async (req, res) => {
     try {
