@@ -1,9 +1,8 @@
 var express = require('express');
 var router = express.Router();
 
-const { addListingService, addListingImagesService, editListingService, deleteListingService,getListingBookings } = require('../services/listingService');
+const { addListingService, addListingImagesService, editListingService, deleteListingService, getListingBookings } = require('../services/listingService');
 const {getListingById} = require("../services/listingService");
-
 
 
 router.post('/add', addListingService);

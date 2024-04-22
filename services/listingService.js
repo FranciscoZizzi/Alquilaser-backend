@@ -1,11 +1,20 @@
 const User = require('../models/user');
 const Listing = require('../models/listing');
 const Booking = require('../models/booking');
+const Image = require('../models/Image');
 const {authenticationService} = require("./authenticationService");
 const multer = require('multer');
 const fs = require('fs');
-const Image = require('../models/Image');
 const upload = multer({ dest: 'uploads/' });
+
+Listing.hasMany(Image, {
+    foreignKey: 'listing_id'
+});
+Image.belongsTo(Listing, {
+    foreignKey: 'listing_id'
+})
+
+// TODO link this to index.js so as not to define relations in services files
 
 exports.addListingImagesService = async (req, res) => {
     try {
@@ -40,13 +49,14 @@ exports.addListingImagesService = async (req, res) => {
                 for (const file of req.files) {
                     const listingPicPath = file.path;
                     const listingPicBuffer = fs.readFileSync(listingPicPath);
-                    // Directly set the listing_id on the image before saving
-                    const image = await Image.create({ image_data: listingPicBuffer, listing_id: listingId });
+                    console.log(listingId)
+                    const image = await Image.create({ image_data: listingPicBuffer});
+                    await listing.addImage(image);
                     fs.unlinkSync(listingPicPath);
                 }
             }
 
-            console.log("Created listing: " + listing.title);
+            console.log("Added images for listing: " + listing.title);
             return res.status(201).json({
                 success: true,
                 data: listing
