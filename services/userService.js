@@ -1,5 +1,6 @@
 const User = require('../models/user');
 const Listing = require('../models/listing');
+const Booking = require('../models/booking');
 const jwt = require("jsonwebtoken");
 const { authenticationService } = require("./authenticationService")
 const multer = require('multer');
@@ -143,13 +144,18 @@ exports.profileService = async (req, res) => {
     let listings = await Listing.findAll({where: {
         user_id: user.user_id
         }});
+
+    let bookings = await Booking.findAll({where: {
+        user_id: user.user_id
+        }})
     // TODO agregar historial de alquileres
     return res.status(200).json({
         success: true,
         data: {
             name: user.name,
             profile_pic: user.profile_pic,
-            listings: listings
+            listings: listings,
+            bookings: bookings,
         }
     });
 }
