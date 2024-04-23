@@ -125,7 +125,7 @@ exports.editListingService = async (req, res) => {
             })
         }
         const listingId = req.params.id;
-        const { title, rate, description } = req.body;
+        const { title, rate, description, availability } = req.body;
 
         let listing = await Listing.findByPk(listingId);
         if (!listing) {
@@ -137,10 +137,11 @@ exports.editListingService = async (req, res) => {
         if (listing.user_id !== authData.data.userId) {
             return res.status(401).send({message: "Modifying listing not allowed"})
         }
-
+        console.log(availability)
         listing.title = title;
         listing.price = rate;
         listing.description = description;
+        listing.listing_state = availability;
 
         await listing.save();
 
