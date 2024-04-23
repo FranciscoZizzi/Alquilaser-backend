@@ -21,7 +21,8 @@ exports.filteredSearch = async (req, res) => {
                 },
                 price: {
                     [Op.gte]: priceMinFilter,
-                }
+                },
+                listing_state: { [Op.ne]: 'deleted'}
             },
             include: [{
                 model: Image,
@@ -40,7 +41,8 @@ exports.filteredSearch = async (req, res) => {
                 },
                 price: {
                     [Op.gte]: priceMinFilter,
-                }
+                },
+                listing_state: { [Op.ne]: 'deleted'}
             },
             include: [{
                 model: Image,

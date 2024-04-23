@@ -8,6 +8,7 @@ const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const fs = require('fs');
 const jwtExpiresIn = '24h';
+const { Op } = require('sequelize');
 
 exports.registerService = async (req, res) => {
     const name = req.body.name;
@@ -147,6 +148,7 @@ exports.getUserListingsService = async (req, res) => {
     let listings = await Listing.findAll({
         where: {
             user_id: user.user_id,
+            listing_state: { [Op.ne]: 'deleted'}
         },
         include: [{
             model: Image,
