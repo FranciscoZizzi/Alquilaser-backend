@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-const { registerService, loginService, profileService, updateProfilePicService, getUserById} = require('../services/userService');
+const { registerService, loginService, profileService, updateProfilePicService, getUserListingsService, getUserById} = require('../services/userService');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -9,6 +9,8 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/get/:id', getUserById);
+
+router.get('/listings', getUserListingsService)
 
 router.post('/register', registerService);
 

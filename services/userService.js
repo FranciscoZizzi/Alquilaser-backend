@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const Listing = require('../models/listing');
 const Booking = require('../models/booking');
+const Image = require('../models/image')
 const jwt = require("jsonwebtoken");
 const { authenticationService } = require("./authenticationService")
 const multer = require('multer');
@@ -133,6 +134,37 @@ exports.loginService = async (req, res) => {
         },
     });
 }
+
+
+
+exports.getUserListingsService = async (req, res) => {
+    let authData = await authenticationService(req, res);
+    if (!authData.success) {
+        return res.status(401).send("user not authenticated");
+    }
+    let user = await User.findByPk(authData.data.userId);
+
+    let listings = await Listing.findAll({
+        where: {
+            user_id: user.user_id,
+        },
+        include: [{
+            model: Image,
+            required: false,
+            limit: 1
+        }]
+    });
+
+    return res.status(200).json({
+        success: true,
+        data: {
+            listings: listings
+        }
+    });
+
+
+}
+
 
 
 exports.profileService = async (req, res) => {
