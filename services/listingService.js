@@ -137,7 +137,6 @@ exports.editListingService = async (req, res) => {
         if (listing.user_id !== authData.data.userId) {
             return res.status(401).send({message: "Modifying listing not allowed"})
         }
-        console.log(availability)
         listing.title = title;
         listing.price = rate;
         listing.description = description;
