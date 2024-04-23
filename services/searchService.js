@@ -1,4 +1,5 @@
 const Listing = require('../models/listing');
+const Image = require('../models/Image');
 const {Op} = require("sequelize");
 
 exports.filteredSearch = async (req, res) => {
@@ -13,21 +14,26 @@ exports.filteredSearch = async (req, res) => {
         searchTerm = '';
     }
     if (priceMaxFilter != null &&  priceMaxFilter !== '') {
-        listings = await Listing.findAll({
+        let listings = await Listing.findAll({
             where: {
                 title: {
                     [Op.like]: '%' + searchTerm + '%'
                 },
                 price: {
                     [Op.gte]: priceMinFilter,
-                    [Op.lte]: priceMaxFilter,
                 }
-            }
+            },
+            include: [{
+                model: Image,
+                required: false,
+                limit: 1
+
+            }]
         });
         return res.send(listings)
     }
     if (priceMaxFilter == null  || priceMaxFilter === '') {
-        listings = await Listing.findAll({
+        let listings = await Listing.findAll({
             where: {
                 title: {
                     [Op.like]: '%' + searchTerm + '%'
@@ -35,7 +41,12 @@ exports.filteredSearch = async (req, res) => {
                 price: {
                     [Op.gte]: priceMinFilter,
                 }
-            }
+            },
+            include: [{
+                model: Image,
+                required: false,
+                limit: 1
+            }]
         });
         return res.send(listings)
     }
