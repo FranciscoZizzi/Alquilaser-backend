@@ -21,6 +21,7 @@ exports.filteredSearch = async (req, res) => {
                 },
                 price: {
                     [Op.gte]: priceMinFilter,
+                    [Op.lte]: priceMaxFilter,
                 },
                 listing_state: { [Op.ne]: 'deleted'}
             },
