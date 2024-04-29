@@ -14,44 +14,57 @@ exports.registerService = async (req, res) => {
     const name = req.body.name;
     const email = req.body.email;
     const password = req.body.password;
-    // TODO manejar confirm password en el front
     const confirmPassword = req.body.confirmPassword;
-    if (!name || !email || !password) {
+    const phoneNumber = req.body.phoneNumber
+    let response = {
+        success: true,
+        emailError: false,
+        usernameError: false,
+        passwordError: false,
+        numberError: false,
+        message: ""
+    }
+    if (!name || !email || !password || !phoneNumber) {
         console.log("Name, email or password missing");
-        error = {
-            message: "Name, email or password missing",
-            code: "MISSING_PARAMS",
-            
-        }
-        return res.status(400).send({
-            message: "Name, email or password missing"
-        });
+        response.success = false;
+        response.emailError = !email;
+        response.usernameError = !name;
+        response.passwordError = !password;
+        response.numberError = !phoneNumber;
+        response.message = "Name, email, password or phone number missing";
+        return res.status(400).send(response);
     }
     let emailIsValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
     if(!emailIsValid) {
         console.log("invalid email");
-        return res.status(400).send({
-            message: "Invalid email"
-        });
-    }
-    if (password !== confirmPassword) {
-        console.log("Password does not match confirmed password");
-        return res.status(400).send({
-            message: "Password does not match confirmed password"
-        });
+        response.success = false;
+        response.emailError = true;
+        response.message = "Invalid email";
+        return res.status(400).send(response);
     }
 
     let existingUser = await User.findOne({where: {email}});
     if (existingUser != null) {
         console.log("Email already associated with an account");
-        return res.status(400).send({
-            message: "Email already associated with an account"
-        });
+        response.success = false;
+        response.emailError = true;
+        response.message = "Email already associated with an account";
+        return res.status(400).send(response);
     }
+
+    if (password !== confirmPassword) {
+        console.log("Password does not match confirmed password");
+        response.success = false;
+        response.passwordError = true;
+        response.message = "Password does not match confirmed password";
+        return res.status(400).send(response);
+    }
+
     let user = await User.create({
         name,
         email,
-        password
+        password,
+        phone: phoneNumber
     });
     let token;
     try {
@@ -65,9 +78,9 @@ exports.registerService = async (req, res) => {
         );
     } catch (err) {
         console.log(err);
-        return res.send({
-            message: "Jwt token error"
-        });
+        response.success = false;
+        response.message = "Jwt token error"
+        return res.send(response);
     }
     console.log("created user " + name);
 
@@ -87,6 +100,9 @@ exports.loginService = async (req, res) => {
     if (!email || !password) {
         console.log('Email or password is missing');
         return res.status(400).send({
+            success: false,
+            emailError: !email,
+            passwordError: !password,
             message: 'Email or password is missing'
         });
     }
@@ -94,13 +110,19 @@ exports.loginService = async (req, res) => {
     if(user == null) {
         console.log('User not found');
         return res.status(400).send({
-            message: 'User not found'
+            success: false,
+            emailError: true,
+            passwordError: true,
+            message: 'Incorrect email or password'
         });
     }
     if(user.password !== password) {
         console.log('Incorrect password');
         return res.status(401).send({
-            message: 'Incorrect password'
+            success: false,
+            emailError: true,
+            passwordError: true,
+            message: 'Incorrect email or password'
         });
     }
     let token;
@@ -116,6 +138,7 @@ exports.loginService = async (req, res) => {
     } catch (err) {
         console.log(err);
         return res.send({
+            success: false,
             message: "Jwt token error"
         });
     }
