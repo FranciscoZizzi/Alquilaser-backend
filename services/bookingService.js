@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const Listing = require('../models/listing');
 const Booking = require('../models/booking');
+const dayjs = require('dayjs');
 const {authenticationService} = require("./authenticationService");
 const {log} = require("debug");
 
@@ -27,6 +28,24 @@ exports.makeBooking = async (req, res) => {
 
     if(listing.dataValues.user_id === userId){
         return res.status(401).send({message: "you cannot book your own listing"});
+    }
+
+    let previousBookings = await Booking.findAll({where:{listing_id: listingId}})
+
+    let startDayjs = dayjs(startDate);
+    let endDayjs = dayjs(endDate);
+
+    for (let i = 0; i < previousBookings.length; i++) {
+        let previousBooking = previousBookings[i];
+
+        let start = dayjs(previousBooking.start_date);
+        let end = dayjs(previousBooking.end_date);
+        if ((startDayjs.isAfter(start) || startDayjs.isSame(start)) && (startDayjs.isBefore(end) || startDayjs.isSame(end))) {
+            return res.status(401).send({message: "Dates are already booked"});
+        }
+        if ((endDayjs.isAfter(start) || endDayjs.isSame(start)) && (endDayjs.isBefore(end) || endDayjs.isSame(end))) {
+            return res.status(401).send({message: "Dates are already booked"});
+        }
     }
 
     let booking = await Booking.create({
