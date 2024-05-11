@@ -322,3 +322,4 @@ exports.getUserById = async (req, res) => {
     let user = await User.findByPk(userId);
     return user ? res.send(user) : res.status(404).send({message:"User not found"});
 }
+
