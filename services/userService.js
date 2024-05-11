@@ -198,13 +198,24 @@ exports.profileService = async (req, res) => {
         return res.status(401).send("user not authenticated");
     }
     let user = await User.findByPk(authData.data.userId);
-    let listings = await Listing.findAll({where: {
-        user_id: user.user_id
+    let listings = await Listing.findAll({
+        where: {
+            user_id: user.user_id,
+            listing_state: { [Op.ne]: 'deleted'}
         }});
 
-    let bookings = await Booking.findAll({where: {
-        user_id: user.user_id
+    let bookings = await Booking.findAll({
+        where: {
+            user_id: user.user_id
         }})
+
+    let rents = [];
+
+    for (let i = 0; i < listings.length; i++) {
+        rents = rents.concat(await Booking.findAll({where: {
+            listing_id: listings[i].id
+            }}))
+    }
 
     return res.status(200).json({
         success: true,
@@ -214,9 +225,10 @@ exports.profileService = async (req, res) => {
             email: user.email,
             profile_pic: user.profile_pic,
             bookings: bookings,
+            rents: rents,
         }
     });
-    //TODO move bookings to another endpoint
+    //TODO move bookings and rents to another endpoint
 }
 
 
@@ -254,65 +266,6 @@ exports.updateProfilePicService = async (req, res) => {
         }
     });
 };
-
-exports.updateUserDataService = async (req,res) => {
-    const name = req.body.name;
-    const email = req.body.email;
-    const password = req.body.password;
-    const confirmPassword = req.body.confirmPassword;
-    const phoneNumber = req.body.phoneNumber
-    let response = {
-        success: true,
-        emailError: false,
-        usernameError: false,
-        passwordError: false,
-        numberError: false,
-        message: ""
-    }
-    if (!name || !email || !password || !phoneNumber) {
-        console.log("Name, email or password missing");
-        response.success = false;
-        response.emailError = !email;
-        response.usernameError = !name;
-        response.passwordError = !password;
-        response.numberError = !phoneNumber;
-        response.message = "Name, email, password or phone number missing";
-        return res.status(400).send(response);
-    }
-    let emailIsValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
-    if(!emailIsValid) {
-        console.log("invalid email");
-        response.success = false;
-        response.emailError = true;
-        response.message = "Invalid email";
-        return res.status(400).send(response);
-    }
-
-    let existingUser = await User.findOne({where: {email}});
-    if (existingUser != null) {
-        console.log("Email already associated with an account");
-        response.success = false;
-        response.emailError = true;
-        response.message = "Email already associated with an account";
-        return res.status(400).send(response);
-    }
-
-    if (password !== confirmPassword) {
-        console.log("Password does not match confirmed password");
-        response.success = false;
-        response.passwordError = true;
-        response.message = "Password does not match confirmed password";
-        return res.status(400).send(response);
-    }
-
-    let user = await User.update({
-        name,
-        email,
-        password,
-        phone: phoneNumber
-    });
-    return res.status(200).send({success: true});
-}
 
 exports.getUserById = async (req, res) => {
     const userId = req.params.id;
