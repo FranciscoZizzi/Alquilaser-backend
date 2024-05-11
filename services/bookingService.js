@@ -53,7 +53,9 @@ exports.makeBooking = async (req, res) => {
         end_date: endDate,
         listing_id: listingId,
         user_id: userId,
-        // TODO price se podría manejar en el front
+        price: listing.price,
+        initial_damage: listing.damage,
+        final_damage: listing.damage,
     })
     console.log({
         start_date: startDate,
