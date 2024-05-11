@@ -198,14 +198,24 @@ exports.profileService = async (req, res) => {
         return res.status(401).send("user not authenticated");
     }
     let user = await User.findByPk(authData.data.userId);
-    let listings = await Listing.findAll({where: {
-        user_id: user.user_id
+    let listings = await Listing.findAll({
+        where: {
+            user_id: user.user_id,
+            listing_state: { [Op.ne]: 'deleted'}
         }});
 
-    let bookings = await Booking.findAll({where: {
-        user_id: user.user_id
+    let bookings = await Booking.findAll({
+        where: {
+            user_id: user.user_id
         }})
-    // TODO agregar historial de alquileres
+
+    let rents = [];
+
+    for (let i = 0; i < listings.length; i++) {
+        rents = rents.concat(await Booking.findAll({where: {
+            listing_id: listings[i].id
+            }}))
+    }
 
     return res.status(200).json({
         success: true,
@@ -214,6 +224,7 @@ exports.profileService = async (req, res) => {
             profile_pic: user.profile_pic,
             listings: listings,
             bookings: bookings,
+            rents: rents,
         }
     });
 }
