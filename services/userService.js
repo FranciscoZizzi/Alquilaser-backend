@@ -190,6 +190,54 @@ exports.getUserListingsService = async (req, res) => {
 
 }
 
+exports.getUserBookingsService = async (req, res) => {
+    let authData = await authenticationService(req, res);
+    if (!authData.success) {
+        return res.status(401).send("user not authenticated");
+    }
+    let user = await User.findByPk(authData.data.userId);
+
+    let bookings = await Booking.findAll({
+        where: {
+            user_id: user.user_id
+        }})
+
+    return res.status(200).json({
+        success: true,
+        data: {
+            bookings: bookings
+        }
+    })
+}
+
+exports.getUserRentsService = async (req, res) => {
+    let authData = await authenticationService(req, res);
+    if (!authData.success) {
+        return res.status(401).send("user not authenticated");
+    }
+    let user = await User.findByPk(authData.data.userId);
+    let listings = await Listing.findAll({
+        where: {
+            user_id: user.user_id,
+            listing_state: { [Op.ne]: 'deleted'}
+        }});
+
+    let rents = [];
+
+    for (let i = 0; i < listings.length; i++) {
+        rents = rents.concat(await Booking.findAll({where: {
+                listing_id: listings[i].id
+            }}))
+    }
+
+    return res.status(200).json({
+        success: true,
+        data: {
+            rents: rents
+        }
+    })
+}
+
 
 
 exports.profileService = async (req, res) => {
@@ -230,7 +278,6 @@ exports.profileService = async (req, res) => {
     });
     //TODO move bookings and rents to another endpoint
 }
-
 
 
 

@@ -6,8 +6,8 @@ const { registerService,
   profileService, updateProfilePicService,
   getUserListingsService,
   getUserById,
-    updateUserDataService
-  } = require('../services/userService');
+    updateUserDataService, getUserBookingsService, getUserRentsService
+} = require('../services/userService');
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -16,7 +16,11 @@ router.get('/', function(req, res, next) {
 
 router.get('/get/:id', getUserById);
 
-router.get('/listings', getUserListingsService)
+router.get('/listings', getUserListingsService);
+
+router.get('/bookings', getUserBookingsService);
+
+router.get('/rents', getUserRentsService);
 
 router.post('/register', registerService);
 
