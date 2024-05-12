@@ -265,12 +265,15 @@ exports.profileService = async (req, res) => {
             }}))
     }
 
+    let rating = user.rating_sum / user.rating_count;
+
     return res.status(200).json({
         success: true,
         data: {
             name: user.name,
             phone: user.phone,
             email: user.email,
+            rating: rating,
             profile_pic: user.profile_pic,
             bookings: bookings,
             rents: rents,

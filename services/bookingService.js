@@ -4,6 +4,7 @@ const Booking = require('../models/booking');
 const dayjs = require('dayjs');
 const {authenticationService} = require("./authenticationService");
 const {log} = require("debug");
+const {Sequelize} = require("sequelize");
 
 exports.makeBooking = async (req, res) => {
     const listingId = req.body.listingId;
@@ -65,4 +66,43 @@ exports.makeBooking = async (req, res) => {
         user_id: userId,
     });
     res.send(booking);
+}
+
+exports.returnBooking = async (req, res) => {
+    let bookingId = req.body.bookingId;
+    let extraFees = req.body.extraFees;
+    let finalDamage = req.body.finalDamage;
+    let rating = req.body.userRating;
+
+    let booking = await Booking.findByPk(bookingId);
+    if (!booking) {
+        console.log("booking not found");
+        res.status(404).send({message:"booking not found"});
+    }
+    let listing = await Listing.findByPk(booking.listing_id);
+    if (!listing) {
+        console.log("listing not found");
+        res.status(404).send({message:"listing not found"});
+    }
+    let user = await User.findByPk(booking.user_id);
+    // TODO should use a transaction but method was not recognized
+    try {
+        await booking.update({
+            extra_fees: extraFees,
+            final_damage: finalDamage,
+            returned: true,
+        });
+        await listing.update({
+            damage: finalDamage
+        });
+        if (user) {
+            await user.update({
+                rating_sum: +user.rating_sum + +rating,
+                rating_count: +user.rating_count + +1
+            });
+        }
+    } catch(error) {
+        console.log(error);
+        res.status(400).send(error);
+    }
 }
