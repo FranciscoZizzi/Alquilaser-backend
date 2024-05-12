@@ -56,6 +56,7 @@ exports.makeBooking = async (req, res) => {
         price: listing.price,
         initial_damage: listing.damage,
         final_damage: listing.damage,
+        returned: false,
     })
     console.log({
         start_date: startDate,

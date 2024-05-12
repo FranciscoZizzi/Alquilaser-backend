@@ -40,7 +40,7 @@ process.on('SIGINT', async () => {
     console.log('Received SIGINT signal. Dropping tables and closing server...');
     try {
         // await sequelize.drop();
-        console.log('All tables dropped successfully.');
+        // console.log('All tables dropped successfully.');
         await sequelize.close();
         console.log('Sequelize connection closed.');
         process.exit(0);

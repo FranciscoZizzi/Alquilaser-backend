@@ -7,7 +7,8 @@ const Booking = sequelize.define('Booking', {
     initial_damage: Sequelize.STRING,
     final_damage: Sequelize.STRING,
     price: Sequelize.INTEGER,
-    extra_fees: Sequelize.INTEGER
+    extra_fees: Sequelize.INTEGER,
+    returned: Sequelize.BOOLEAN
 }, { freezeTableName: true });
 
 module.exports = Booking;
