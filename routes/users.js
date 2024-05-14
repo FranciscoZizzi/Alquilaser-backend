@@ -6,7 +6,10 @@ const { registerService,
   profileService, updateProfilePicService,
   getUserListingsService,
   getUserById,
-    updateUserDataService, getUserBookingsService, getUserRentsService
+    updateUserDataService,
+  getUserBookingsService,
+  getUserRentsService,
+  changePasswordService
 } = require('../services/userService');
 
 /* GET users listing. */
@@ -31,5 +34,7 @@ router.get('/profile', profileService);
 router.put('/profile', updateProfilePicService);
 
 router.put('/edit', updateUserDataService);
+
+router.put('/change_password', changePasswordService)
 
 module.exports = router;

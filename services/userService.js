@@ -379,3 +379,48 @@ exports.getUserById = async (req, res) => {
     let user = await User.findByPk(userId);
     return user ? res.send(user) : res.status(404).send({message:"User not found"});
 }
+
+
+exports.changePasswordService = async(req,res) => {
+    console.log("Entering flavour town")
+    let authData = await authenticationService(req, res);
+    if (!authData.success) {
+        return res.status(401).json({ error: 'User not authenticated' });
+    }
+    const prevPassword = req.body.prevPassword
+    const password = req.body.password;
+    const confirmPassword = req.body.confirmPassword;
+    const user = await User.findOne({ where: { user_id: authData.data.userId } });
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    let response = {
+        success: true,
+        matchingPasswordError: false,
+        wrongPasswordError: false,
+    }
+    if(!password){
+        response.success = false;
+        wrongPasswordError = true;
+        response.message = "Password must not be empty"
+        return res.status(400).send(response)
+    }
+    if(prevPassword !== user.password){
+        console.log("Previous password is incorrect")
+        response.success = false;
+        response.wrongPasswordError = true;
+        response.message = "Incorrect password";
+        return res.status(400).send(response)
+    }
+    if (password !== confirmPassword) {
+        console.log("Password does not match confirmed password");
+        response.success = false;
+        response.matchingPasswordError = true;
+        response.message = "Password does not match confirmed password";
+        return res.status(400).send(response);
+    }
+    console.log("Updated user password")
+    await user.update({password})
+
+    return res.status(200).send({success: true});
+}
