@@ -284,6 +284,7 @@ exports.profileService = async (req, res) => {
 
 
 
+
 exports.updateProfilePicService = async (req, res) => {
     let authData = await authenticationService(req, res);
     if (!authData.success) {
@@ -317,6 +318,59 @@ exports.updateProfilePicService = async (req, res) => {
     });
 };
 
+exports.updateUserDataService = async (req,res) => {
+    let authData = await authenticationService(req, res);
+    if (!authData.success) {
+        return res.status(401).json({ error: 'User not authenticated' });
+    }
+    const user = await User.findOne({ where: { user_id: authData.data.userId } });
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    const name = req.body.name;
+    const email = req.body.email;
+    const phoneNumber = req.body.phoneNumber
+    let existingUser = await User.findOne({where: {email}});
+    let response = {
+        success: true,
+        emailError: false,
+        usernameError: false,
+        numberError: false,
+        message: ""
+    }
+    if (!name || !email || !phoneNumber) {
+        console.log("Name or email missing");
+        response.success = false;
+        response.emailError = !email;
+        response.usernameError = !name;
+        response.numberError = !phoneNumber;
+        response.message = "Name, email or phone number missing";
+        return res.status(400).send(response);
+    }
+    let emailIsValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
+    if(!emailIsValid) {
+        console.log("invalid email");
+        response.success = false;
+        response.emailError = true;
+        response.message = "Invalid email";
+        return res.status(400).send(response);
+    }
+
+    if (existingUser != null && existingUser.user_id != user.user_id) {
+        console.log("Email already associated with an account");
+        response.success = false;
+        response.emailError = true;
+        response.message = "Email already associated with an account";
+        return res.status(400).send(response);
+    }
+    await user.update({
+        name,
+        email,
+        phone: phoneNumber
+    });
+    return res.status(200).send({success: true});
+}
+
 exports.getUserById = async (req, res) => {
     const userId = req.params.id;
     if (!userId) {
@@ -324,9 +378,4 @@ exports.getUserById = async (req, res) => {
     }
     let user = await User.findByPk(userId);
     return user ? res.send(user) : res.status(404).send({message:"User not found"});
-}
-
-exports.updateUserDataService = (req, res) => {
-    // TODO implement, function here to avoid server crashing
-    res.send("nothing")
 }
