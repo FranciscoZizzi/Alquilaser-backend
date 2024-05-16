@@ -7,15 +7,6 @@ const multer = require('multer');
 const fs = require('fs');
 const upload = multer({ dest: 'uploads/' });
 
-Listing.hasMany(Image, {
-    foreignKey: 'listing_id'
-});
-Image.belongsTo(Listing, {
-    foreignKey: 'listing_id'
-})
-
-// TODO link this to index.js so as not to define relations in services files
-
 exports.addListingImagesService = async (req, res) => {
     try {
         upload.any()(req, res, async (err) => {
@@ -205,6 +196,7 @@ exports.getListingById = async (req, res) => {
     console.log(mapImages)
 
     let result = {
+        id: listing.id,
         title: listing.title,
         price: listing.price,
         description: listing.description,
@@ -225,6 +217,6 @@ exports.getListingBookings = async (req, res) => {
     if (!listing) {
         return res.status(404).send({message:"Listing not found"});
     }
-    let bookings = await Booking.findAll({where: {listing_id: listingId}});
+    let bookings = await Booking.findAll({where: {listing_id: listingId, returned: false}});
     return res.send(bookings);
 }

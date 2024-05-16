@@ -38,6 +38,9 @@ exports.makeBooking = async (req, res) => {
 
     for (let i = 0; i < previousBookings.length; i++) {
         let previousBooking = previousBookings[i];
+        if (previousBooking.returned) {
+            continue;
+        }
 
         let start = dayjs(previousBooking.start_date);
         let end = dayjs(previousBooking.end_date);
