@@ -16,8 +16,8 @@ const User = sequelize.define('User', {
     password: Sequelize.STRING,
     name: Sequelize.STRING,
     phone: Sequelize.STRING,
-    rating_sum: Sequelize.INTEGER,
     rating_count: Sequelize.INTEGER,
+    rating_avg: Sequelize.DECIMAL(5, 1),
     createdAt: Sequelize.DATE,
     updatedAt: Sequelize.DATE,
     profile_pic: Sequelize.BLOB

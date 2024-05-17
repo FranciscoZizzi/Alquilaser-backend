@@ -17,6 +17,7 @@ exports.makeBooking = async (req, res) => {
     }
 
     const userId = authData.data.userId;
+    let user = await User.findByPk(userId);
 
     let listing = await Listing.findByPk(listingId);
     if (!listing) {
@@ -25,6 +26,13 @@ exports.makeBooking = async (req, res) => {
 
     if(!startDate || !endDate){
         return res.status(401).send({message: "Select booking dates first"});
+    }
+
+
+    if(listing.req_rating !== null && user.rating_avg !== null){
+        if(user.rating_avg < listing.req_rating){
+            return res.status(402).send({message:"User doesnt have required minimum rating"})
+        }
     }
 
     if(listing.dataValues.user_id === userId){
@@ -89,6 +97,11 @@ exports.returnBooking = async (req, res) => {
     }
     let user = await User.findByPk(booking.user_id);
     // TODO should use a transaction but method was not recognized
+
+    let ratingCount = (user.rating_count == null) ? 0 : user.rating_count
+    let ratingAvg = (user.rating_avg == null) ? 0 : user.rating_avg
+    const updatedAvg = (Number(ratingAvg * ratingCount) + Number(rating))/(ratingCount + 1)
+
     try {
         await booking.update({
             extra_fees: extraFees,
@@ -100,8 +113,8 @@ exports.returnBooking = async (req, res) => {
         });
         if (user) {
             await user.update({
-                rating_sum: +user.rating_sum + +rating,
-                rating_count: +user.rating_count + +1
+                rating_avg: updatedAvg,
+                rating_count: ratingCount + 1
             });
         }
     } catch(error) {

@@ -72,7 +72,7 @@ exports.addListingService = async (req, res) => {
             message: "Not logged in"
         })
     }
-    const { title, price, description } = req.body;
+    const { title, price, description, req_rating } = req.body;
 
     if (!title || !price || !description) {
         console.log('Some field is missing');
@@ -90,6 +90,7 @@ exports.addListingService = async (req, res) => {
     let listing = await Listing.create({
         title,
         price,
+        req_rating,
         description,
         damage: "no",
         listing_state: "available",

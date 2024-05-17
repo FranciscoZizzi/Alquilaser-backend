@@ -382,7 +382,6 @@ exports.getUserById = async (req, res) => {
 
 
 exports.changePasswordService = async(req,res) => {
-    console.log("Entering flavour town")
     let authData = await authenticationService(req, res);
     if (!authData.success) {
         return res.status(401).json({ error: 'User not authenticated' });
