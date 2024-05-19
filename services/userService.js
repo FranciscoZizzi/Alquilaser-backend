@@ -9,6 +9,7 @@ const upload = multer({ dest: 'uploads/' });
 const fs = require('fs');
 const jwtExpiresIn = '24h';
 const { Op } = require('sequelize');
+var nodemailer = require("nodemailer");
 
 exports.registerService = async (req, res) => {
     const name = req.body.name;
@@ -422,4 +423,74 @@ exports.changePasswordService = async(req,res) => {
     await user.update({password})
 
     return res.status(200).send({success: true});
+}
+
+exports.forgotPasswordService = async(req,res) => {
+    console.log("Entering forgot password")
+    const email  = req.body.email;
+    try {
+        const oldUser = await User.findOne({where: {email}});
+        if (!oldUser) {
+            console.log("User not found")
+            return res.json({ status: "User not found" });
+        }
+        const secret = process.env.JWT_SECRET + oldUser.password;
+        const token = jwt.sign({ email: oldUser.email, id: oldUser.user_id }, secret, {
+            expiresIn: "5m",
+        });
+        const link = `http://localhost:3002/reset_password/${oldUser.user_id}/${token}`;
+        var transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: "ENTER EMAIL",
+                pass: "ENTER APP PASSWORD",
+            },
+        });
+
+        var mailOptions = {
+            from: "ENTER EMAIL",
+            to: email,
+            subject: "Password Reset",
+            text: `Reset your password using the following link:\n\n ${link}`,
+        };
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log("Email sent: " + info.response);
+            }
+        });
+        console.log("Sent email")
+        console.log(link);
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+exports.resetPasswordService = async (req, res) => {
+    const id = req.params.id;
+    const token = req.params.token
+    const { password, confirmPassword } = req.body;
+    console.log("User id: " + id)
+    console.log(token)
+
+    if(password !== confirmPassword){
+        return res.status(400).send("Password doesnt match");
+    }
+
+    const oldUser = await User.findOne({where: {user_id: id}});
+    if (!oldUser) {
+        return res.status(401).send("User not found");
+    }
+    console.log("Found old user")
+    const secret = process.env.JWT_SECRET + oldUser.password;
+    try {
+        const verify = jwt.verify(token, secret);
+        await oldUser.update({password})
+
+    } catch (error) {
+        console.log(error);
+        res.json({ status: "Something Went Wrong" });
+    }
 }

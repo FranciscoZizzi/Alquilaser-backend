@@ -9,7 +9,9 @@ const { registerService,
     updateUserDataService,
   getUserBookingsService,
   getUserRentsService,
-  changePasswordService
+  changePasswordService,
+  forgotPasswordService,
+  resetPasswordService
 } = require('../services/userService');
 
 /* GET users listing. */
@@ -36,5 +38,9 @@ router.put('/profile', updateProfilePicService);
 router.put('/edit', updateUserDataService);
 
 router.put('/change_password', changePasswordService)
+
+router.post('/forgot_password', forgotPasswordService)
+
+router.put("/reset_password/:id/:token", resetPasswordService)
 
 module.exports = router;
