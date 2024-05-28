@@ -77,6 +77,16 @@ exports.makeBooking = async (req, res) => {
         user_id: userId,
     });
     res.send(booking);
+    try {
+        await listing.update({
+            listing_state: 'booked'
+            }
+        )
+    }
+    catch(error) {
+        console.log(error);
+        res.status(400).send(error);
+    }
 }
 
 exports.returnBooking = async (req, res) => {
@@ -109,7 +119,7 @@ exports.returnBooking = async (req, res) => {
             returned: true,
         });
         await listing.update({
-            damage: finalDamage
+            damage: finalDamage,
         });
         if (user) {
             await user.update({
