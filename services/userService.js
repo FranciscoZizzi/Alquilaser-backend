@@ -65,7 +65,9 @@ exports.registerService = async (req, res) => {
         name,
         email,
         password,
-        phone: phoneNumber
+        phone: phoneNumber,
+        rating_count: 0,
+        rating_avg: 0
     });
     let token;
     try {
