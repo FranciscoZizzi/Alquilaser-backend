@@ -5,8 +5,7 @@ const {Op} = require("sequelize");
 exports.filteredSearch = async (req, res) => {
     let priceMinFilter = req.query.priceMinFilter;
     let priceMaxFilter = req.query.priceMaxFilter;
-    let searchTerm = req.body.searchTerm;
-    let listings = [] // TODO no se usa
+    let searchTerm = req.query.searchTerm;
     if (priceMinFilter == null || priceMinFilter === '') {
         priceMinFilter = '0';
     }
