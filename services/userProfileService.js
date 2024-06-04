@@ -1,6 +1,6 @@
 const { User, Booking, Listing } = require('../models');
 
-exports.getUserProfile = async (req, res) => {
+exports.getUserProfile = async (req, res) => { // TODO no tiene usages, estamos usando otro service
     try {
         const userID = req.params.userID;
         // Find the user

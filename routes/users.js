@@ -14,10 +14,6 @@ const { registerService,
   resetPasswordService
 } = require('../services/userService');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
 
 router.get('/get/:id', getUserById);
 
@@ -41,6 +37,6 @@ router.put('/change_password', changePasswordService)
 
 router.post('/forgot_password', forgotPasswordService)
 
-router.put("/reset_password/:id/:token", resetPasswordService)
+router.put('/reset_password/:id/:token', resetPasswordService)
 
 module.exports = router;

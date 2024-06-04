@@ -12,10 +12,10 @@ exports.addListingImagesService = async (req, res) => {
         upload.any()(req, res, async (err) => {
             if (err instanceof multer.MulterError) {
                 console.error('Multer error:', err);
-                return res.status(400).json({error: 'Error uploading listing images'});
+                return res.status(400).json({message: 'Error uploading listing images'});
             } else if (err) {
                 console.error('Unknown error:', err);
-                return res.status(500).json({error: 'Internal server error'});
+                return res.status(500).json({message: 'Internal server error'});
             }
             const authData = await authenticationService(req, res);
             if (!authData.success) {
@@ -41,7 +41,15 @@ exports.addListingImagesService = async (req, res) => {
                     const listingPicPath = file.path;
                     const listingPicBuffer = fs.readFileSync(listingPicPath);
                     console.log(listingId)
-                    const image = await Image.create({ image_data: listingPicBuffer});
+                    let image;
+                    try {
+                        image = await Image.create({image_data: listingPicBuffer})
+                    }
+                    catch(e) {
+                        console.log(e)
+                        await listing.destroy();
+                        return res.status(400).json({message: 'Error uploading listing images'})
+                    }
                     await listing.addImage(image);
                     fs.unlinkSync(listingPicPath);
                 }

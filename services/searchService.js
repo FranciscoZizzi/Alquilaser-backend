@@ -6,7 +6,7 @@ exports.filteredSearch = async (req, res) => {
     let priceMinFilter = req.query.priceMinFilter;
     let priceMaxFilter = req.query.priceMaxFilter;
     let searchTerm = req.body.searchTerm;
-    let listings = []
+    let listings = [] // TODO no se usa
     if (priceMinFilter == null || priceMinFilter === '') {
         priceMinFilter = '0';
     }

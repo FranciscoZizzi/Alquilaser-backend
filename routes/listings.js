@@ -15,7 +15,7 @@ router.get('/bookings/:id', getListingBookings);
 
 router.put('/edit/:id', editListingService);
 
-router.delete('/delete/:id', deleteListingService);
+router.delete('/delete/:id', deleteListingService); // TODO creo que no se usa, borrar
 
 
 
