@@ -5,6 +5,7 @@ const Image = require('../models/image');
 const {authenticationService} = require("./authenticationService");
 const multer = require('multer');
 const fs = require('fs');
+const {Op} = require("sequelize");
 const upload = multer({ dest: 'uploads/' });
 
 exports.addListingImagesService = async (req, res) => {
@@ -125,6 +126,18 @@ exports.editListingService = async (req, res) => {
         if (!listing) {
             return res.status(404).send({
                 message: "Listing not found"
+            });
+        }
+        let existingListing = await Listing.findOne({
+            where: {
+                title,
+                listing_state:{
+                    [Op.ne]: 'deleted'}
+        }});
+        if (existingListing != null) {
+            console.log("There is already a publication with that title");
+            return res.status(400).send({
+                message: "There is already a publication with that title"
             });
         }
 
