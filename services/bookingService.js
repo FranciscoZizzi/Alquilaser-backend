@@ -28,15 +28,14 @@ exports.makeBooking = async (req, res) => {
         return res.status(401).send({message: "Select booking dates first"});
     }
 
+    if(listing.dataValues.user_id === userId){
+        return res.status(401).send({message: "you cannot book your own listing"});
+    }
 
     if(listing.req_rating !== null && user.rating_avg !== null){
         if(user.rating_avg < listing.req_rating){
             return res.status(402).send({message:"User doesnt have required minimum rating"})
         }
-    }
-
-    if(listing.dataValues.user_id === userId){
-        return res.status(401).send({message: "you cannot book your own listing"});
     }
 
     let previousBookings = await Booking.findAll({where:{listing_id: listingId}})
@@ -120,6 +119,7 @@ exports.returnBooking = async (req, res) => {
         });
         await listing.update({
             damage: finalDamage,
+            listing_state: "available"
         });
         if (user) {
             await user.update({
