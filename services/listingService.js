@@ -89,6 +89,20 @@ exports.addListingService = async (req, res) => {
             message: "Some field is missing"
         });
     }
+    let existingListing = await Listing.findOne({
+        where: {
+            title,
+            listing_state:{
+                [Op.ne]: 'deleted'
+            }
+        }});
+
+    if (existingListing != null) {
+        console.log("There is already a publication with that title");
+        return res.status(400).send({
+            message: "There is already a publication with that title"
+        });
+    }
 
     let listing = await Listing.create({
         title,
@@ -126,18 +140,6 @@ exports.editListingService = async (req, res) => {
         if (!listing) {
             return res.status(404).send({
                 message: "Listing not found"
-            });
-        }
-        let existingListing = await Listing.findOne({
-            where: {
-                title,
-                listing_state:{
-                    [Op.ne]: 'deleted'}
-        }});
-        if (existingListing != null) {
-            console.log("There is already a publication with that title");
-            return res.status(400).send({
-                message: "There is already a publication with that title"
             });
         }
 
