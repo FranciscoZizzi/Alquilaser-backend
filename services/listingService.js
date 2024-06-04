@@ -88,13 +88,7 @@ exports.addListingService = async (req, res) => {
             message: "Some field is missing"
         });
     }
-    let existingListing = await Listing.findOne({where: {title}});
-    if (existingListing != null) {
-        console.log("There is already a publication with that title");
-        return res.status(400).send({
-            message: "There is already a publication with that title"
-        });
-    }
+
     let listing = await Listing.create({
         title,
         price,
