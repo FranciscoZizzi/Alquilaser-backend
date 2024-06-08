@@ -220,6 +220,7 @@ exports.getListingById = async (req, res) => {
         description: listing.description,
         damage: listing.damage,
         listing_state: listing.listing_state,
+        req_rating: listing.req_rating,
         owner: owner.name,
         images: mapImages
     }
