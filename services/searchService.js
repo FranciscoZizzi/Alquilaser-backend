@@ -5,6 +5,7 @@ const {Op} = require("sequelize");
 exports.filteredSearch = async (req, res) => {
     let priceMinFilter = req.query.priceMinFilter;
     let priceMaxFilter = req.query.priceMaxFilter;
+    let maxRatingFilter = req.query.maxRatingFilter;
     let searchTerm = req.query.searchTerm;
     if (priceMinFilter == null || priceMinFilter === '') {
         priceMinFilter = '0';
@@ -12,6 +13,11 @@ exports.filteredSearch = async (req, res) => {
     if (searchTerm == null) {
         searchTerm = '';
     }
+    if(maxRatingFilter == null){
+        maxRatingFilter = 5;
+    }
+    console.log("REQ RATING");
+    console.log(maxRatingFilter);
     if (priceMaxFilter != null &&  priceMaxFilter !== '') {
         let listings = await Listing.findAll({
             where: {
@@ -22,6 +28,7 @@ exports.filteredSearch = async (req, res) => {
                     [Op.gte]: priceMinFilter,
                     [Op.lte]: priceMaxFilter,
                 },
+                req_rating: {[Op.lte]: maxRatingFilter},
                 listing_state: { [Op.ne]: 'deleted'}
             },
             include: [{
@@ -42,6 +49,7 @@ exports.filteredSearch = async (req, res) => {
                 price: {
                     [Op.gte]: priceMinFilter,
                 },
+                req_rating: {[Op.lte]: maxRatingFilter},
                 listing_state: { [Op.ne]: 'deleted'}
             },
             include: [{
