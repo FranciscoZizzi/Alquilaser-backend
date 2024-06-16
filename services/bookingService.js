@@ -76,15 +76,18 @@ exports.makeBooking = async (req, res) => {
         user_id: userId,
     });
     res.send(booking);
-    try {
-        await listing.update({
-            listing_state: 'booked'
-            }
-        )
-    }
-    catch(error) {
-        console.log(error);
-        res.status(400).send(error);
+    let start = dayjs(booking.start_date);
+    let end = dayjs(booking.end_date);
+    if ((dayjs().isAfter(start) || dayjs().isSame(start)) && (dayjs().isBefore(end) || dayjs().isSame(end))) {
+        try {
+            await listing.update({
+                    listing_state: 'booked'
+                }
+            )
+        } catch(error) {
+            console.log(error);
+            res.status(400).send(error);
+        }
     }
 }
 
