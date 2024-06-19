@@ -24,15 +24,19 @@ exports.makeBooking = async (req, res) => {
         return res.status(404).send("listing not found");
     }
 
-    if(!startDate || !endDate){
+    if (!startDate || !endDate) {
         return res.status(401).send({message: "Select booking dates first"});
     }
 
-    if(listing.dataValues.user_id === userId){
+    if (listing.dataValues.user_id === userId) {
         return res.status(401).send({message: "you cannot book your own listing"});
     }
 
-    if(listing.req_rating !== null && user.rating_avg !== null){
+    if (listing.listing_state === "damaged") {
+        return res.status(401).send({message: "Part is damaged"});
+    }
+
+    if (listing.req_rating !== null && user.rating_avg !== null) {
         if(user.rating_avg < listing.req_rating){
             return res.status(402).send({message:"User doesnt have required minimum rating"})
         }
