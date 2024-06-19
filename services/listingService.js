@@ -166,33 +166,6 @@ exports.editListingService = async (req, res) => {
     }
 };
 
-
-exports.deleteListingService = async (req, res) => {
-    try {
-        const listingID = req.params.listingID;
-
-        const listing = await Listing.findByPk(listingID);
-        if (!listing) {
-            return res.status(404).send({
-                message: "Listing not found"
-            });
-        }
-
-        await listing.destroy(); // TODO por ahí no conviene hacer destroy porque rompería los historiales de reserva
-
-        console.log("Listing deleted:", listingID);
-        return res.status(200).json({
-            success: true,
-            message: "Listing deleted successfully"
-        });
-    } catch (error) {
-        console.error("Error deleting listing:", error);
-        return res.status(500).send({
-            message: "Internal Server Error"
-        });
-    }
-};
-
 exports.getListingById = async (req, res) => {
     const listingId = req.params.id;
     if (!listingId) {

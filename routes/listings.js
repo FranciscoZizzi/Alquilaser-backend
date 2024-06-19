@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-const { addListingService, addListingImagesService, editListingService, deleteListingService, getListingBookings } = require('../services/listingService');
+const { addListingService, addListingImagesService, editListingService, getListingBookings } = require('../services/listingService');
 const {getListingById} = require("../services/listingService");
 
 
@@ -14,9 +14,6 @@ router.get('/get/:id', getListingById);
 router.get('/bookings/:id', getListingBookings);
 
 router.put('/edit/:id', editListingService);
-
-router.delete('/delete/:id', deleteListingService); // TODO creo que no se usa, borrar
-
 
 
 module.exports = router;
