@@ -134,6 +134,7 @@ exports.returnBooking = async (req, res) => {
                 rating_count: ratingCount + 1
             });
         }
+        res.status(200).send("success");
     } catch(error) {
         console.log(error);
         res.status(400).send(error);

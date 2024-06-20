@@ -142,6 +142,12 @@ exports.editListingService = async (req, res) => {
                 message: "Listing not found"
             });
         }
+        if (listing.title !== title) {
+            let existingListing = await Listing.findOne({where: {title}});
+            if (existingListing && existingListing.listing_state !== "deleted") {
+                return res.status(401).send({message: "Listing with title already exists"});
+            }
+        }
 
         if (listing.user_id !== authData.data.userId) {
             return res.status(401).send({message: "Modifying listing not allowed"})
