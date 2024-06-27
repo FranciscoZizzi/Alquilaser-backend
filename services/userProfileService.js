@@ -9,13 +9,13 @@ exports.getUserProfile = async (req, res) => { // TODO no tiene usages, estamos 
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Find all bookings associated with the user
-        const bookings = await Booking.findAll({ where: { user_id: userID } });
+        const bookings = await Booking.findAll({
+            where: { user_id: userID },
+            order: [['end_date', 'DESC']]
+        });
 
-        // Find all listings associated with the user
         const listings = await Listing.findAll({ where: { user_id: userID } });
 
-        // Construct the user profile object
         const userProfile = {
             user: user.toJSON(),
             bookings: bookings.map(booking => booking.toJSON()),
@@ -28,3 +28,4 @@ exports.getUserProfile = async (req, res) => { // TODO no tiene usages, estamos 
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
