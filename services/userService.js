@@ -494,3 +494,35 @@ exports.resetPasswordService = async (req, res) => {
         res.json({ status: "Something Went Wrong" });
     }
 }
+exports.emailValidationService = async(req,res) => {
+    let authData = await authenticationService(req, res);
+    if (!authData.success) {
+        return res.status(401).json({error: 'User not authenticated'});
+    }
+
+    const email = req.body.email;
+    try {
+        const user = User.findOne({where: {email}});
+        if (!user) {
+            return res.status(404).json({error: 'User not found'});
+        }
+        var transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: "alquilaser.service@gmail.com",
+                pass: "ksyx qenv zfyc iwyn",
+            },
+        });
+
+        var mailOptions = {
+            from: "alquilaser.service@gmail.com",
+            to: email,
+            subject: "Mail validation",
+            text: `Validate your mail `
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.json({ status: "Something Went Wrong" });
+    }
+}
