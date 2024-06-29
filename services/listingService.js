@@ -153,6 +153,26 @@ exports.editListingService = async (req, res) => {
         if (listing.user_id !== authData.data.userId) {
             return res.status(401).send({message: "Modifying listing not allowed"})
         }
+
+        if (availability === "available") {
+            let previousBookings = await Booking.findAll({where: {listing_id: listingId}});
+
+            let now = dayjs();
+
+            for (let i = 0; i < previousBookings.length; i++) {
+                let previousBooking = previousBookings[i];
+                if (previousBooking.returned || !previousBooking.hidden) {
+                    continue;
+                }
+
+                let start = dayjs(previousBooking.start_date);
+                let end = dayjs(previousBooking.end_date);
+                if ((now.isAfter(start) || now.isSame(start)) && (now.isBefore(end) || now.isSame(end))) {
+                    await previousBooking.destroy();
+                }
+            }
+        }
+
         listing.title = title;
         listing.price = rate;
         listing.description = description;
@@ -192,7 +212,7 @@ exports.blockListingService = async (req, res) => {
     }
 
     if (!startDate || !endDate) {
-        return res.status(401).send({message: "Select booking dates first"});
+        return res.status(401).send({message: "Select dates first"});
     }
 
     let previousBookings = await Booking.findAll({where:{listing_id: listingId}})
