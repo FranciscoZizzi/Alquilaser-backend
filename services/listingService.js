@@ -175,18 +175,27 @@ exports.editListingService = async (req, res) => {
 
 exports.blockListingService = async (req, res) => {
     const listingId = req.params.id;
-    const reason = req.params.id;
+    const reason = req.body.reason;
     const startDate = req.body.startDate;
     const endDate = req.body.endDate;
 
+    let authData = await authenticationService(req, res);
+    if (!authData.success) {
+        return res.status(401).send({message: "user not authenticated"});
+    }
+
+    const userId = authData.data.userId;
+
     let listing = await Listing.findByPk(listingId);
     if (!listing) {
-        return res.status(404).send("Listing not found");
+        return res.status(404).send({message: "Listing not found"});
     }
 
     if (!startDate || !endDate) {
         return res.status(401).send({message: "Select booking dates first"});
     }
+
+    let previousBookings = await Booking.findAll({where:{listing_id: listingId}})
 
     let startDayjs = dayjs(startDate);
     let endDayjs = dayjs(endDate);
@@ -211,7 +220,7 @@ exports.blockListingService = async (req, res) => {
         start_date: startDate,
         end_date: endDate,
         listing_id: listingId,
-        user_id: -1,
+        user_id: userId,
         price: 0,
         initial_damage: listing.damage,
         final_damage: listing.damage,

@@ -229,7 +229,8 @@ exports.getUserRentsService = async (req, res) => {
 
     for (let i = 0; i < listings.length; i++) {
         rents = rents.concat(await Booking.findAll({where: {
-                listing_id: listings[i].id
+                listing_id: listings[i].id,
+                hidden: false
             }}))
     }
 
@@ -257,14 +258,16 @@ exports.profileService = async (req, res) => {
 
     let bookings = await Booking.findAll({
         where: {
-            user_id: user.user_id
+            user_id: user.user_id,
+            hidden: false
         }})
 
     let rents = [];
 
     for (let i = 0; i < listings.length; i++) {
         rents = rents.concat(await Booking.findAll({where: {
-            listing_id: listings[i].id
+            listing_id: listings[i].id,
+                hidden: false
             }}))
     }
 
