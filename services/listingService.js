@@ -6,6 +6,7 @@ const {authenticationService} = require("./authenticationService");
 const multer = require('multer');
 const fs = require('fs');
 const {Op} = require("sequelize");
+const dayjs = require("dayjs");
 const upload = multer({ dest: 'uploads/' });
 
 exports.addListingImagesService = async (req, res) => {
@@ -171,6 +172,68 @@ exports.editListingService = async (req, res) => {
         });
     }
 };
+
+exports.blockListingService = async (req, res) => {
+    const listingId = req.params.id;
+    const reason = req.params.id;
+    const startDate = req.body.startDate;
+    const endDate = req.body.endDate;
+
+    let listing = await Listing.findByPk(listingId);
+    if (!listing) {
+        return res.status(404).send("Listing not found");
+    }
+
+    if (!startDate || !endDate) {
+        return res.status(401).send({message: "Select booking dates first"});
+    }
+
+    let startDayjs = dayjs(startDate);
+    let endDayjs = dayjs(endDate);
+
+    for (let i = 0; i < previousBookings.length; i++) {
+        let previousBooking = previousBookings[i];
+        if (previousBooking.returned) {
+            continue;
+        }
+
+        let start = dayjs(previousBooking.start_date);
+        let end = dayjs(previousBooking.end_date);
+        if ((startDayjs.isAfter(start) || startDayjs.isSame(start)) && (startDayjs.isBefore(end) || startDayjs.isSame(end))) {
+            // TODO borrar booking y notificarle al usuario por mail
+        }
+        if ((endDayjs.isAfter(start) || endDayjs.isSame(start)) && (endDayjs.isBefore(end) || endDayjs.isSame(end))) {
+            // TODO borrar booking y notificarle al usuario por mail
+        }
+    }
+
+    let booking = await Booking.create({
+        start_date: startDate,
+        end_date: endDate,
+        listing_id: listingId,
+        user_id: -1,
+        price: 0,
+        initial_damage: listing.damage,
+        final_damage: listing.damage,
+        returned: false,
+        hidden: true,
+    });
+
+    let start = dayjs(booking.start_date);
+    let end = dayjs(booking.end_date);
+    if ((dayjs().isAfter(start) || dayjs().isSame(start)) && (dayjs().isBefore(end) || dayjs().isSame(end))) {
+        try {
+            await listing.update({
+                    listing_state: reason
+                }
+            );
+        } catch(error) {
+            console.log(error);
+            res.status(400).send(error);
+        }
+    }
+    return res.send(booking);
+}
 
 exports.getListingById = async (req, res) => {
     const listingId = req.params.id;
