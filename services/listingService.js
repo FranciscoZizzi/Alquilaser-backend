@@ -7,6 +7,7 @@ const multer = require('multer');
 const fs = require('fs');
 const {Op} = require("sequelize");
 const dayjs = require("dayjs");
+const nodemailer = require("nodemailer");
 const upload = multer({ dest: 'uploads/' });
 
 exports.addListingImagesService = async (req, res) => {
@@ -161,14 +162,18 @@ exports.editListingService = async (req, res) => {
 
             for (let i = 0; i < previousBookings.length; i++) {
                 let previousBooking = previousBookings[i];
-                if (previousBooking.returned || !previousBooking.hidden) {
+                if (previousBooking.returned) {
                     continue;
                 }
 
                 let start = dayjs(previousBooking.start_date);
                 let end = dayjs(previousBooking.end_date);
                 if ((now.isAfter(start) || now.isSame(start)) && (now.isBefore(end) || now.isSame(end))) {
-                    await previousBooking.destroy();
+                    if (previousBooking.hidden) {
+                        await previousBooking.destroy();
+                    } else {
+                        return res.status(401).send({message: "Listing is currently booked"})
+                    }
                 }
             }
         }
@@ -226,13 +231,29 @@ exports.blockListingService = async (req, res) => {
             continue;
         }
 
+        let client = await User.findByPk(previousBooking.user_id);
+
         let start = dayjs(previousBooking.start_date);
         let end = dayjs(previousBooking.end_date);
+
         if ((startDayjs.isAfter(start) || startDayjs.isSame(start)) && (startDayjs.isBefore(end) || startDayjs.isSame(end))) {
-            // TODO borrar booking y notificarle al usuario por mail
-        }
-        if ((endDayjs.isAfter(start) || endDayjs.isSame(start)) && (endDayjs.isBefore(end) || endDayjs.isSame(end))) {
-            // TODO borrar booking y notificarle al usuario por mail
+            if ((dayjs().isAfter(start) || dayjs().isSame(start)) && (dayjs().isBefore(end) || dayjs().isSame(end))) {
+                return res.status(401).send({message: "There is an active booking"})
+            }
+            await previousBooking.destroy();
+            if (client) {
+                console.log("email sent");
+                // sendCanceledBookingEmail(listing.title, client.email); TODO sacar comentario
+            }
+        } else if ((endDayjs.isAfter(start) || endDayjs.isSame(start)) && (endDayjs.isBefore(end) || endDayjs.isSame(end))) {
+            if ((dayjs().isAfter(start) || dayjs().isSame(start)) && (dayjs().isBefore(end) || dayjs().isSame(end))) {
+                return res.status(401).send({message: "There is an active booking"})
+            }
+            await previousBooking.destroy();
+            if (client) {
+                console.log("email sent");
+                // sendCanceledBookingEmail(listing.title, client.email); // TODO sacar comentario
+            }
         }
     }
 
@@ -262,6 +283,31 @@ exports.blockListingService = async (req, res) => {
         }
     }
     return res.send(booking);
+}
+
+sendCanceledBookingEmail = (listingName, clientEmail) => {
+    var transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "alquilaser.service@gmail.com",
+            pass: "ksyx qenv zfyc iwyn",
+        },
+    });
+
+    var mailOptions = {
+        from: "alquilaser.service@gmail.com",
+        to: clientEmail,
+        subject: "Booking Canceled",
+        text: `Your booking for ${listingName} has been canceled`,
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log("Email sent: " + info.response);
+        }
+    });
 }
 
 exports.getListingById = async (req, res) => {
