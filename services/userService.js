@@ -283,9 +283,6 @@ exports.profileService = async (req, res) => {
     //TODO move bookings and rents to another endpoint
 }
 
-
-
-
 exports.updateProfilePicService = async (req, res) => {
     let authData = await authenticationService(req, res);
     if (!authData.success) {
@@ -443,7 +440,7 @@ exports.forgotPasswordService = async(req,res) => {
             service: "gmail",
             auth: {
                 user: "alquilaser.service@gmail.com",
-                pass: "ksyx qenv zfyc iwyn",
+                pass: process.env.GOOGLE_APP_PASSWORD,
             },
         });
 
@@ -494,6 +491,7 @@ exports.resetPasswordService = async (req, res) => {
         res.json({ status: "Something Went Wrong" });
     }
 }
+
 exports.emailValidationService = async(req,res) => {
     let authData = await authenticationService(req, res);
     if (!authData.success) {
@@ -510,16 +508,26 @@ exports.emailValidationService = async(req,res) => {
             service: "gmail",
             auth: {
                 user: "alquilaser.service@gmail.com",
-                pass: "ksyx qenv zfyc iwyn",
+                pass: process.env.GOOGLE_APP_PASSWORD,
             },
         });
-
+        const link = `http://localhost:3002/validate_mail/${user.user_id}`;
         var mailOptions = {
             from: "alquilaser.service@gmail.com",
             to: email,
             subject: "Mail validation",
             text: `Validate your mail `
         }
+
+        transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log("Email sent: " + info.response);
+            }
+        });
+        console.log("Sent email")
+        console.log(link);
 
     } catch (error) {
         console.log(error);
