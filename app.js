@@ -8,9 +8,24 @@ const usersRouter = require('./routes/users');
 const listingsRouter = require('./routes/listings');
 const bookingsRouter = require('./routes/bookings');
 const cors = require('cors');
-
+const passport = require('passport');
+require('./util/passport-config');
 const app = express();
 app.use(cors());
+
+const session = require('express-session');
+
+
+app.use(session({
+    secret: 'your_secret_key', // A secret key to sign the session ID cookie
+    resave: false, // Forces the session to be saved back to the session store
+    saveUninitialized: true, // Forces a session that is "uninitialized" to be saved to the store
+    cookie: {
+        secure: false, // Set to true if your site is served over HTTPS
+        httpOnly: true, // Makes the cookie inaccessible to client-side JavaScript
+        maxAge: 86400000 // Session max age in milliseconds (24 hours)
+    }
+}));
 
 const sequelize = require("./util/database")
 
@@ -33,6 +48,22 @@ app.use('/api', indexRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/listings', listingsRouter);
 app.use('/api/bookings', bookingsRouter);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findByPk(id);
+        done(null, user);
+    } catch (error) {
+        done(error, null);
+    }
+});
 
 const PORT = process.env.PORT || 3000;
 

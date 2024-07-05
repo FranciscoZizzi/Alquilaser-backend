@@ -491,7 +491,7 @@ exports.forgotPasswordService = async(req,res) => {
             service: "gmail",
             auth: {
                 user: "alquilaser.service@gmail.com",
-                pass: "ksyx qenv zfyc iwyn",
+                pass: process.env.GOOGLE_APP_PASSWORD,
             },
         });
 
