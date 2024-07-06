@@ -11,12 +11,7 @@ exports.makeBooking = async (req, res) => {
     const startDate = req.body.startDate;
     const endDate = req.body.endDate;
 
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).send({message: "user not authenticated"});
-    }
-
-    const userId = authData.data.userId;
+    const userId = req.user.user_id;
     let user = await User.findByPk(userId);
 
     let listing = await Listing.findByPk(listingId);
@@ -72,6 +67,7 @@ exports.makeBooking = async (req, res) => {
         initial_damage: listing.damage,
         final_damage: listing.damage,
         returned: false,
+        hidden: false
     })
     console.log({
         start_date: startDate,
@@ -79,7 +75,6 @@ exports.makeBooking = async (req, res) => {
         listing_id: listingId,
         user_id: userId,
     });
-    res.send(booking);
     let start = dayjs(booking.start_date);
     let end = dayjs(booking.end_date);
     if ((dayjs().isAfter(start) || dayjs().isSame(start)) && (dayjs().isBefore(end) || dayjs().isSame(end))) {
@@ -87,12 +82,13 @@ exports.makeBooking = async (req, res) => {
             await listing.update({
                     listing_state: 'booked'
                 }
-            )
+            );
         } catch(error) {
             console.log(error);
             res.status(400).send(error);
         }
     }
+    return res.send(booking);
 }
 
 exports.returnBooking = async (req, res) => {
@@ -134,6 +130,7 @@ exports.returnBooking = async (req, res) => {
                 rating_count: ratingCount + 1
             });
         }
+        res.status(200).send("success");
     } catch(error) {
         console.log(error);
         res.status(400).send(error);

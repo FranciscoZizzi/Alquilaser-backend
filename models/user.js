@@ -25,7 +25,8 @@ const User = sequelize.define('User', {
     rating_avg: Sequelize.DECIMAL(5, 1),
     createdAt: Sequelize.DATE,
     updatedAt: Sequelize.DATE,
-    profile_pic: Sequelize.BLOB
+    profile_pic: Sequelize.BLOB,
+    google_id: Sequelize.STRING,
 }, { freezeTableName: true });
 
 

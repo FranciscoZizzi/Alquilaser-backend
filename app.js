@@ -8,9 +8,10 @@ const usersRouter = require('./routes/users');
 const listingsRouter = require('./routes/listings');
 const bookingsRouter = require('./routes/bookings');
 const cors = require('cors');
-
+const passport = require('passport');
 const app = express();
 app.use(cors());
+
 
 const sequelize = require("./util/database")
 
@@ -24,6 +25,8 @@ sequelize.sync({ force: false })
         console.error('Error syncing database:', err);
     });
 
+app.use(passport.initialize());
+require('./util/passport-config');
 app.use(express.static(path.join(__dirname, '..', 'Alquilaser')));
 
 app.use(bodyParser.urlencoded({ extended: true }));

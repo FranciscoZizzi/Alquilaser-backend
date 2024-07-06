@@ -165,11 +165,7 @@ exports.loginService = async (req, res) => {
 
 
 exports.getUserListingsService = async (req, res) => {
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).send("user not authenticated");
-    }
-    let user = await User.findByPk(authData.data.userId);
+    let user = await User.findByPk(req.user.user_id);
 
     let listings = await Listing.findAll({
         where: {
@@ -194,24 +190,42 @@ exports.getUserListingsService = async (req, res) => {
 }
 
 exports.getUserBookingsService = async (req, res) => {
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).send("user not authenticated");
+    try {
+
+
+        let user = await User.findByPk(req.user.user_id);
+
+        let bookings = await Booking.findAll({
+            where: {
+                user_id: user.user_id
+            },
+            include: [{
+                model: Listing,
+                include: [{
+                    model: User,
+                    attributes: ['name']
+                }]
+            }]
+        });
+
+        const bookingsWithOwner = bookings.map(booking => {
+            const bookingJson = booking.toJSON();
+            bookingJson.listingOwner = booking.Listing.User.name;
+            return bookingJson;
+        });
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                bookings: bookingsWithOwner
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching user bookings:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
     }
-    let user = await User.findByPk(authData.data.userId);
+};
 
-    let bookings = await Booking.findAll({
-        where: {
-            user_id: user.user_id
-        }})
-
-    return res.status(200).json({
-        success: true,
-        data: {
-            bookings: bookings
-        }
-    })
-}
 
 exports.getUserRentsService = async (req, res) => {
     let authData = await authenticationService(req, res);
@@ -229,7 +243,8 @@ exports.getUserRentsService = async (req, res) => {
 
     for (let i = 0; i < listings.length; i++) {
         rents = rents.concat(await Booking.findAll({where: {
-                listing_id: listings[i].id
+                listing_id: listings[i].id,
+                hidden: false
             }}))
     }
 
@@ -244,50 +259,69 @@ exports.getUserRentsService = async (req, res) => {
 
 
 exports.profileService = async (req, res) => {
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).send("user not authenticated");
-    }
-    let user = await User.findByPk(authData.data.userId);
-    let listings = await Listing.findAll({
-        where: {
-            user_id: user.user_id,
-            listing_state: { [Op.ne]: 'deleted'}
-        }});
+    try {
+        let user = await User.findByPk(req.user.user_id);
+        let listings = await Listing.findAll({
+            where: {
+                user_id: user.user_id,
+                listing_state: { [Op.ne]: 'deleted'}
+            }
+        });
 
-    let bookings = await Booking.findAll({
-        where: {
-            user_id: user.user_id
-        }})
+        let bookings = await Booking.findAll({
+            where: {
+                user_id: user.user_id,
+                hidden: false
+            },
+            include: [{
+                model: Listing,
+                include: [{
+                    model: User,
+                    attributes: ['name']
+                }]
+            }]
+        });
 
-    let rents = [];
-
-    for (let i = 0; i < listings.length; i++) {
-        rents = rents.concat(await Booking.findAll({where: {
-            listing_id: listings[i].id
-            }}))
-    }
-
-    return res.status(200).json({
-        success: true,
-        data: {
-            name: user.name,
-            phone: user.phone,
-            email: user.email,
-            rating: user.rating_avg,
-            profile_pic: user.profile_pic,
-            bookings: bookings,
-            rents: rents,
+        // Fetch rents without including the owner information
+        let rents = [];
+        for (let i = 0; i < listings.length; i++) {
+            const bookingResults = await Booking.findAll({
+                where: { listing_id: listings[i].id, hidden: false },
+                order: [['end_date', 'DESC']]
+            });
+            rents = rents.concat(bookingResults);
         }
-    });
-    //TODO move bookings and rents to another endpoint
-}
+
+        // Sort the rents array by end_date in descending order
+        rents.sort((a, b) => new Date(b.end_date) - new Date(a.end_date));
+
+        // Map bookings to include the owner information
+        const bookingsWithOwner = bookings.map(booking => {
+            const bookingJson = booking.toJSON();
+            bookingJson.owner = booking.Listing.User.name;
+            return bookingJson;
+        });
+
+        return res.status(200).json({
+            success: true,
+            data: {
+                name: user.name,
+                phone: user.phone,
+                email: user.email,
+                rating: user.rating_avg,
+                profile_pic: user.profile_pic,
+                bookings: bookingsWithOwner,
+                rents: rents.map(rent => rent.toJSON()) // Convert rents to JSON without modifying the structure
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching profile data:", error);
+        return res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
 
 exports.updateProfilePicService = async (req, res) => {
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).json({ error: 'User not authenticated' });
-    }
     upload.single('profile_pic')(req, res, async (err) => {
         if (err instanceof multer.MulterError) {
             console.error('Multer error:', err);
@@ -298,7 +332,7 @@ exports.updateProfilePicService = async (req, res) => {
         }
 
         try {
-            const user = await User.findOne({ where: { user_id: authData.data.userId } });
+            const user = await User.findOne({ where: { user_id: req.user.user_id } });
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
@@ -317,11 +351,7 @@ exports.updateProfilePicService = async (req, res) => {
 };
 
 exports.updateUserDataService = async (req,res) => {
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).json({ error: 'User not authenticated' });
-    }
-    const user = await User.findOne({ where: { user_id: authData.data.userId } });
+    const user = await User.findOne({ where: { user_id: req.user.user_id } });
     if (!user) {
         return res.status(404).json({ error: 'User not found' });
     }
@@ -423,7 +453,6 @@ exports.changePasswordService = async(req,res) => {
 }
 
 exports.forgotPasswordService = async(req,res) => {
-    console.log("Entering forgot password")
     const email  = req.body.email;
     try {
         const oldUser = await User.findOne({where: {email}});
