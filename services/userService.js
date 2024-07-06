@@ -454,7 +454,6 @@ exports.changePasswordService = async(req,res) => {
 }
 
 exports.forgotPasswordService = async(req,res) => {
-    console.log("Entering forgot password")
     const email  = req.body.email;
     try {
         const oldUser = await User.findOne({where: {email}});
