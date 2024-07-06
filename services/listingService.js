@@ -8,6 +8,7 @@ const fs = require('fs');
 const {Op} = require("sequelize");
 const dayjs = require("dayjs");
 const nodemailer = require("nodemailer");
+const {sendEmail} = require("./emailService");
 const upload = multer({ dest: 'uploads/' });
 
 exports.addListingImagesService = async (req, res) => {
@@ -222,8 +223,8 @@ exports.blockListingService = async (req, res) => {
 
     let previousBookings = await Booking.findAll({where:{listing_id: listingId}})
 
-    let startDayjs = dayjs(startDate);
-    let endDayjs = dayjs(endDate);
+    let blockStartDay = dayjs(startDate);
+    let blockEndDay = dayjs(endDate);
 
     for (let i = 0; i < previousBookings.length; i++) {
         let previousBooking = previousBookings[i];
@@ -233,26 +234,16 @@ exports.blockListingService = async (req, res) => {
 
         let client = await User.findByPk(previousBooking.user_id);
 
-        let start = dayjs(previousBooking.start_date);
-        let end = dayjs(previousBooking.end_date);
+        let bookingStartDay = dayjs(previousBooking.start_date);
+        let bookingEndDay = dayjs(previousBooking.end_date);
 
-        if ((startDayjs.isAfter(start) || startDayjs.isSame(start)) && (startDayjs.isBefore(end) || startDayjs.isSame(end))) {
-            if ((dayjs().isAfter(start) || dayjs().isSame(start)) && (dayjs().isBefore(end) || dayjs().isSame(end))) {
+        if (dateRangesOverlap(blockStartDay, blockEndDay, bookingStartDay, bookingEndDay)) {
+            if ((dayjs().isAfter(bookingStartDay) || dayjs().isSame(bookingStartDay)) && (dayjs().isBefore(bookingEndDay) || dayjs().isSame(bookingEndDay))) {
                 return res.status(401).send({message: "There is an active booking"})
             }
             await previousBooking.destroy();
             if (client) {
-                console.log("email sent");
-                // sendCanceledBookingEmail(listing.title, client.email); TODO sacar comentario
-            }
-        } else if ((endDayjs.isAfter(start) || endDayjs.isSame(start)) && (endDayjs.isBefore(end) || endDayjs.isSame(end))) {
-            if ((dayjs().isAfter(start) || dayjs().isSame(start)) && (dayjs().isBefore(end) || dayjs().isSame(end))) {
-                return res.status(401).send({message: "There is an active booking"})
-            }
-            await previousBooking.destroy();
-            if (client) {
-                console.log("email sent");
-                // sendCanceledBookingEmail(listing.title, client.email); // TODO sacar comentario
+                sendEmail(client.email, "Booking Canceled", `Your booking for ${listing.title} has been canceled`);
             }
         }
     }
@@ -285,29 +276,17 @@ exports.blockListingService = async (req, res) => {
     return res.send(booking);
 }
 
-sendCanceledBookingEmail = (listingName, clientEmail) => {
-    var transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: "alquilaser.service@gmail.com",
-            pass: "ksyx qenv zfyc iwyn",
-        },
-    });
-
-    var mailOptions = {
-        from: "alquilaser.service@gmail.com",
-        to: clientEmail,
-        subject: "Booking Canceled",
-        text: `Your booking for ${listingName} has been canceled`,
-    };
-
-    transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-            console.log(error);
-        } else {
-            console.log("Email sent: " + info.response);
-        }
-    });
+dateRangesOverlap = (dateStartA, dateEndA, dateStartB, dateEndB) => {
+    if ((dateStartA.isAfter(dateStartB) || dateStartA.isSame(dateStartB)) && (dateStartA.isBefore(dateEndB) || dateStartA.isSame(dateEndB))) {
+        return true;
+    }
+    if ((dateEndA.isAfter(dateStartB) || dateEndA.isSame(dateStartB)) && (dateEndA.isBefore(dateEndB) || dateEndA.isSame(dateEndB))) {
+        return true;
+    }
+    if ((dateStartB.isAfter(dateStartA) || dateStartB.isSame(dateStartA)) && (dateStartB.isBefore(dateEndA) || dateStartB.isSame(dateEndA))) {
+        return true;
+    }
+    return false;
 }
 
 exports.getListingById = async (req, res) => {
