@@ -1,19 +1,19 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const jwt = require('jsonwebtoken'); // For JWT operations
-const JwtStrategy = require('passport-jwt').Strategy; // Correctly importing JwtStrategy
+const jwt = require('jsonwebtoken'); 
+const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 
 const jwtLogin = new JwtStrategy(
     {
-        jwtFromRequest: ExtractJwt.fromHeader('authorization'),
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         secretOrKey: process.env.JWT_SECRET,
     },
     async (payload, done) => {
         try {
-            const user = await User.findById(payload.id);
+            const user = await User.findOne({where: {user_id: payload.userId}});
 
             if (user) {
                 done(null, user);
@@ -39,13 +39,15 @@ const googleLogin = new GoogleStrategy(
     async (accessToken, refreshToken, profile, done) => {
         const email = profile.emails[0]?.value;
         try {
-            const oldUser = await User.findOne({ where : {email: email} });
+            const oldUser = await User.findOne({ where: { email: email } });
 
             if (oldUser) {
-                return done(null, oldUser);
+                const userToken = jwt.sign({ userId: oldUser.user_id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+                return done(null, { user: oldUser, token: userToken });
             }
         } catch (err) {
             console.log(err);
+            return done(err, false);
         }
 
         try {
@@ -55,13 +57,14 @@ const googleLogin = new GoogleStrategy(
                 name: profile.displayName,
                 rating_count: 1,
                 rating_avg: 3.0
-                
             });
-            done(null, newUser);
+            const userToken = jwt.sign({ userId: newUser.user_id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+            return done(null, { user: newUser, token: userToken });
         } catch (err) {
             console.log(err);
+            return done(err, false);
         }
-    },
+    }
 );
 
 passport.use(googleLogin);

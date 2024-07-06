@@ -165,11 +165,7 @@ exports.loginService = async (req, res) => {
 
 
 exports.getUserListingsService = async (req, res) => {
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).send("user not authenticated");
-    }
-    let user = await User.findByPk(authData.data.userId);
+    let user = await User.findByPk(req.user.user_id);
 
     let listings = await Listing.findAll({
         where: {
@@ -195,12 +191,9 @@ exports.getUserListingsService = async (req, res) => {
 
 exports.getUserBookingsService = async (req, res) => {
     try {
-        let authData = await authenticationService(req, res);
-        if (!authData.success) {
-            return res.status(401).send("User not authenticated");
-        }
 
-        let user = await User.findByPk(authData.data.userId);
+
+        let user = await User.findByPk(req.user.user_id);
 
         let bookings = await Booking.findAll({
             where: {
@@ -266,12 +259,7 @@ exports.getUserRentsService = async (req, res) => {
 
 exports.profileService = async (req, res) => {
     try {
-        let authData = await authenticationService(req, res);
-        if (!authData.success) {
-            return res.status(401).send("User not authenticated");
-        }
-
-        let user = await User.findByPk(authData.data.userId);
+        let user = await User.findByPk(req.user.user_id);
         let listings = await Listing.findAll({
             where: {
                 user_id: user.user_id,
@@ -335,10 +323,6 @@ exports.profileService = async (req, res) => {
 
 
 exports.updateProfilePicService = async (req, res) => {
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).json({ error: 'User not authenticated' });
-    }
     upload.single('profile_pic')(req, res, async (err) => {
         if (err instanceof multer.MulterError) {
             console.error('Multer error:', err);
@@ -349,7 +333,7 @@ exports.updateProfilePicService = async (req, res) => {
         }
 
         try {
-            const user = await User.findOne({ where: { user_id: authData.data.userId } });
+            const user = await User.findOne({ where: { user_id: req.user.user_id } });
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
@@ -368,11 +352,7 @@ exports.updateProfilePicService = async (req, res) => {
 };
 
 exports.updateUserDataService = async (req,res) => {
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).json({ error: 'User not authenticated' });
-    }
-    const user = await User.findOne({ where: { user_id: authData.data.userId } });
+    const user = await User.findOne({ where: { user_id: req.user.user_id } });
     if (!user) {
         return res.status(404).json({ error: 'User not found' });
     }
