@@ -185,12 +185,7 @@ exports.blockListingService = async (req, res) => {
     const startDate = req.body.startDate;
     const endDate = req.body.endDate;
 
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).send({message: "user not authenticated"});
-    }
-
-    const userId = authData.data.userId;
+    const userId = req.user.user_id;
 
     let listing = await Listing.findByPk(listingId);
     if (!listing) {

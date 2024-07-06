@@ -5,6 +5,6 @@ const passport = require('passport');
 router.use(passport.initialize());
 
 router.post('/add', passport.authenticate('jwt', { session: false }), makeBooking);
-router.post('/return', returnBooking)
+router.post('/return', returnBooking);
 
 module.exports = router;

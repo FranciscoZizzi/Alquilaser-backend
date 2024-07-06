@@ -17,7 +17,7 @@ router.get('/bookings/:id', getListingBookings);
 
 router.put('/edit/:id', passport.authenticate('jwt', { session: false }), editListingService);
 
-router.put('/block/:id', blockListingService)
+router.put('/block/:id', passport.authenticate('jwt', { session: false }), blockListingService)
 
 
 module.exports = router;

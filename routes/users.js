@@ -48,9 +48,9 @@ router.get('/bookings', passport.authenticate('jwt', { session: false }), getUse
 
 router.get('/rents', passport.authenticate('jwt', { session: false }), getUserRentsService);
 
-router.post('/register', passport.authenticate('jwt', { session: false }), registerService);
+router.post('/register', registerService);
 
-router.post('/login', passport.authenticate('jwt', { session: false }), loginService);
+router.post('/login', loginService);
 
 router.get('/profile', passport.authenticate('jwt', { session: false }), profileService);
 
