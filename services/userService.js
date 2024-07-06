@@ -516,7 +516,7 @@ exports.emailValidationService = async(req,res) => {
             from: "alquilaser.service@gmail.com",
             to: email,
             subject: "Mail validation",
-            text: `Validate your mail `
+            text: `Validate your mail using the following link:\n\n ${link}`
         }
 
         transporter.sendMail(mailOptions, function (error, info) {
