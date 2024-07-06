@@ -21,13 +21,7 @@ exports.addListingImagesService = async (req, res) => {
                 console.error('Unknown error:', err);
                 return res.status(500).json({message: 'Internal server error'});
             }
-            const authData = await authenticationService(req, res);
-            if (!authData.success) {
-                console.log("Not logged in");
-                return res.status(401).send({
-                    message: "Not logged in"
-                });
-            }
+            
 
             // Assuming you have the listing ID from the request or another source
             const listingId = req.params.listingID;
@@ -77,13 +71,6 @@ exports.addListingImagesService = async (req, res) => {
 
 
 exports.addListingService = async (req, res) => {
-    const authData = await authenticationService(req, res);
-    if (!authData.success) {
-        console.log("Not logged in")
-        return res.status(401).send({
-            message: "Not logged in"
-        })
-    }
     const { title, price, description, req_rating } = req.body;
 
     if (!title || !price || !description) {
@@ -114,7 +101,7 @@ exports.addListingService = async (req, res) => {
         description,
         damage: "no",
         listing_state: "available",
-        user_id: authData.data.userId
+        user_id: req.user.user_id
     });
     console.log("created listing " + title);
     return res.status(201).json({
@@ -129,13 +116,6 @@ exports.addListingService = async (req, res) => {
 
 exports.editListingService = async (req, res) => {
     try {
-        const authData = await authenticationService(req, res);
-        if (!authData.success) {
-            console.log("Not logged in")
-            return res.status(401).send({
-                message: "Not logged in"
-            })
-        }
         const listingId = req.params.id;
         const { title, rate, description, availability } = req.body;
 
@@ -152,7 +132,7 @@ exports.editListingService = async (req, res) => {
             }
         }
 
-        if (listing.user_id !== authData.data.userId) {
+        if (listing.user_id !== req.user.user_id) {
             return res.status(401).send({message: "Modifying listing not allowed"})
         }
 
