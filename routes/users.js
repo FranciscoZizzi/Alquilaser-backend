@@ -1,7 +1,6 @@
 var express = require('express');
 var router = express.Router();
 const passport = require('passport');
-const session = require('express-session');
 const app = express();
 
 const { registerService,
@@ -18,70 +17,33 @@ const { registerService,
 } = require('../services/userService');
 
 
-app.use(session({
-    secret: process.env.JWT_SECRET,
-    resave: false,
-    saveUninitialized: false
-}));
-
-
-
-router.use(session({ secret: process.env.JWT_SECRET, resave: false, saveUninitialized: false }));
 router.use(passport.initialize());
-router.use(passport.session());
 
-passport.serializeUser(function(user, done) {
-  done(null, user.id);
-});
 
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
-    done(err, user);
-  });
-});
+router.get(
+    '/google',
+    passport.authenticate('google', {
+      scope: ['profile', 'email'],
+    }),
+);
 
-// Adjusted login endpoint to use Passport.js
-router.post('/login', passport.authenticate('local', {
-  successRedirect: '/', // Redirect to home page on successful login
-  failureRedirect: '/login', // Redirect back to login page on failed login
-  failureFlash: true // Set flash messages on failure
-}));
-
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-router.get('/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login' }),
+router.get(
+    '/google/callback',
+    passport.authenticate('google', {
+      session: false,
+        successRedirect: 'http://localhost:3002/',
+        failureRedirect: 'http://localhost:3002/login'
+    }),
     (req, res) => {
-      // On successful authentication, generate a token and send it back
-      const token = jwt.sign(
-          {
-            userId: req.user.googleId, // Assuming you store Google's user ID as googleId in your User model
-            email: req.user.emails[0]?.value, // Assuming the first email is the primary one
-          },
-          process.env.JWT_SECRET,
-          { expiresIn: jwtExpiresIn }
-      );
-
-      let profilePic = null;
-      if (req.user.photos) {
-        profilePic = req.user.photos[0].value; // Assuming the first photo URL is the profile picture
-      }
-
-      return res.status(200).json({
-        success: true,
-        data: {
-          userId: req.user.googleId,
-          email: req.user.emails[0]?.value,
-          token: token,
-          profilePic: profilePic
-        },
-      });
-    }
+      const token = req.user.generateJWT();
+      res.cookie('x-auth-cookie', token);
+      res.redirect('http://localhost:3002/');
+    },
 );
 
 router.get('/get/:id', getUserById);
 
-router.get('/listings', getUserListingsService);
+router.get('/listings', passport.authenticate("local", { session: false }) ,getUserListingsService);
 
 router.get('/bookings', getUserBookingsService);
 
