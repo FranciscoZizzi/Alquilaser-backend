@@ -10,6 +10,7 @@ const fs = require('fs');
 const jwtExpiresIn = '24h';
 const { Op } = require('sequelize');
 var nodemailer = require("nodemailer");
+const {sendEmail} = require("./emailService");
 
 exports.registerService = async (req, res) => {
     const name = req.body.name;
@@ -521,44 +522,22 @@ exports.resetPasswordService = async (req, res) => {
     }
 }
 
-exports.emailValidationService = async(req,res) => {
-    let authData = await authenticationService(req, res);
-    if (!authData.success) {
-        return res.status(401).json({error: 'User not authenticated'});
-    }
-
+exports.emailValidationService = async (req,res) => {
+    const id = req.params.id
     const email = req.body.email;
     try {
-        const user = User.findOne({where: {email}});
+        const user = await User.findOne({where: {email}});
         if (!user) {
             return res.status(404).json({error: 'User not found'});
         }
-        var transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: "alquilaser.service@gmail.com",
-                pass: process.env.GOOGLE_APP_PASSWORD,
-            },
-        });
-        const link = `http://localhost:3002/validate_mail/${user.user_id}`;
-        var mailOptions = {
-            from: "alquilaser.service@gmail.com",
-            to: email,
-            subject: "Mail validation",
-            text: `Validate your mail using the following link:\n\n ${link}`
-        }
 
-        transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log("Email sent: " + info.response);
-            }
-        });
+        const link = `http://localhost:3002/validate_email/${user.user_id}`;
+        const subject = "Email validation"
+        const text = `Validate your mail using the following link:\n\n ${link}`
+        sendEmail(email, subject,text)
         console.log("Sent email")
         console.log(link);
-
-    } catch (error) {
+    } catch (error){
         console.log(error);
         res.json({ status: "Something Went Wrong" });
     }
