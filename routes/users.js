@@ -14,7 +14,7 @@ const { registerService,
   changePasswordService,
   forgotPasswordService,
   resetPasswordService,
-  emailValidationService
+  emailValidationService, validateUserEmail
 } = require('../services/userService');
 
 
@@ -66,5 +66,7 @@ router.post('/forgot_password', forgotPasswordService)
 router.put('/reset_password/:id/:token', resetPasswordService)
 
 router.put('/validate_email/:id', emailValidationService)
+
+router.put('/validate_user_email', validateUserEmail)
 
 module.exports = router;

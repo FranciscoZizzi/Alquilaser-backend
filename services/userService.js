@@ -523,7 +523,7 @@ exports.resetPasswordService = async (req, res) => {
 }
 
 exports.emailValidationService = async (req,res) => {
-    const id = req.params.id
+    console.log("Asdasdasddas")
     const email = req.body.email;
     try {
         const user = await User.findOne({where: {email}});
@@ -541,4 +541,26 @@ exports.emailValidationService = async (req,res) => {
         console.log(error);
         res.json({ status: "Something Went Wrong" });
     }
+}
+exports.validateUserEmail = async (req,res) => {
+    console.log("hola")
+
+    const user = await User.findOne({ where: { user_id: req.body.user_id } });
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    if(user.email_validated){
+        return res.status(404).json({ error: 'User already validated' });
+    }
+    try {
+        await user.update({
+            email_validated: true
+        });
+    } catch (error){
+        console.log(error)
+        res.json({ status: "Something Went Wrong" });
+    }
+
+    console.log("user email validated")
+    return res.status(200).send({success: true});
 }
