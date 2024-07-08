@@ -65,7 +65,7 @@ router.post('/forgot_password', forgotPasswordService)
 
 router.put('/reset_password/:id/:token', resetPasswordService)
 
-router.put('/validate_email/:id', emailValidationService)
+router.post('/validate_email/:id', emailValidationService)
 
 router.put('/validate_user_email', validateUserEmail)
 

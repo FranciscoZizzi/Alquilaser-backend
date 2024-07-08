@@ -531,7 +531,7 @@ exports.emailValidationService = async (req,res) => {
             return res.status(404).json({error: 'User not found'});
         }
 
-        const link = `http://localhost:3002/validate_email/${user.user_id}`;
+        const link = `http://localhost:3002/validate_email?userId=${user.user_id}`;
         const subject = "Email validation"
         const text = `Validate your mail using the following link:\n\n ${link}`
         sendEmail(email, subject,text)
@@ -543,8 +543,6 @@ exports.emailValidationService = async (req,res) => {
     }
 }
 exports.validateUserEmail = async (req,res) => {
-    console.log("hola")
-
     const user = await User.findOne({ where: { user_id: req.body.user_id } });
     if (!user) {
         return res.status(404).json({ error: 'User not found' });
