@@ -51,10 +51,8 @@ exports.makeBooking = async (req, res) => {
 
         let start = dayjs(previousBooking.start_date);
         let end = dayjs(previousBooking.end_date);
-        if ((startDayjs.isAfter(start) || startDayjs.isSame(start)) && (startDayjs.isBefore(end) || startDayjs.isSame(end))) {
-            return res.status(401).send({message: "Dates are already booked"});
-        }
-        if ((endDayjs.isAfter(start) || endDayjs.isSame(start)) && (endDayjs.isBefore(end) || endDayjs.isSame(end))) {
+
+        if (dateRangesOverlap(startDayjs, endDayjs, start, end)) {
             return res.status(401).send({message: "Dates are already booked"});
         }
     }
@@ -90,6 +88,19 @@ exports.makeBooking = async (req, res) => {
         }
     }
     return res.send(booking);
+}
+
+dateRangesOverlap = (dateStartA, dateEndA, dateStartB, dateEndB) => {
+    if ((dateStartA.isAfter(dateStartB) || dateStartA.isSame(dateStartB)) && (dateStartA.isBefore(dateEndB) || dateStartA.isSame(dateEndB))) {
+        return true;
+    }
+    if ((dateEndA.isAfter(dateStartB) || dateEndA.isSame(dateStartB)) && (dateEndA.isBefore(dateEndB) || dateEndA.isSame(dateEndB))) {
+        return true;
+    }
+    if ((dateStartB.isAfter(dateStartA) || dateStartB.isSame(dateStartA)) && (dateStartB.isBefore(dateEndA) || dateStartB.isSame(dateEndA))) {
+        return true;
+    }
+    return false;
 }
 
 exports.returnBooking = async (req, res) => {
