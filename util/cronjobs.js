@@ -43,4 +43,28 @@ exports.startingBookingsCronjob = async () => {
     });
 }
 
+exports.endingBookingsCronjob = async () => {
+    cron.schedule("* * * * *", async () => {
+        try {
+            const now = dayjs().format('YYYY-MM-DDT03:00:00.000[Z]');
+            let startingBookings = await Booking.findAll( {where:{end_date: now}})
+            for (const booking of startingBookings) {
+                let client = await User.findByPk(booking.user_id);
+                let listing = await Listing.findByPk(booking.listing_id)
+                let owner = await User.findByPk(listing.user_id)
+                const ownerEmail = owner.email
+                const clientEmail = client.email
+                const emailSubject = 'A booking ends today'
+                const ownerMessage = `Your listing: '${listing.title}' is being returned today!`
+                const clientMessage = `Your booking for: '${listing.title}' ends today`
+
+                sendEmail(ownerEmail,emailSubject,ownerMessage)
+                sendEmail(clientEmail,emailSubject,clientMessage)
+            }
+        } catch (error){
+            console.log(error)
+        }
+
+    });
+}
 
