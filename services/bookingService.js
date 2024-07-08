@@ -5,6 +5,7 @@ const dayjs = require('dayjs');
 const {authenticationService} = require("./authenticationService");
 const {log} = require("debug");
 const {Sequelize} = require("sequelize");
+const {sendEmail} = require("./emailService");
 
 exports.makeBooking = async (req, res) => {
     const listingId = req.body.listingId;
@@ -159,6 +160,11 @@ exports.cancelBooking = async (req, res) => {
     }
 
     await booking.destroy();
-    // TODO mandar mail
+
+    let listing = await Listing.findByPk(booking.listing_id);
+    let owner = await User.findByPk(listing.user_id);
+    let client = await User.findByPk(booking.user_id);
+    // console.log(owner.email, "A client has cancelled their booking", `${client.name} has cancelled their booking for ${listing.title} from ${booking.start_date.toString().split('00:')[0]} to ${booking.end_date.toString().split('00:')[0]}`)
+    sendEmail(owner.email, "A client has cancelled their booking", `${client.name} has cancelled their booking for ${listing.title} from ${booking.start_date.toString().split('00:')[0]} to ${booking.end_date.toString().split('00:')[0]}`);
     return res.status(200).send({message:"booking canceled successfully"});
 }
