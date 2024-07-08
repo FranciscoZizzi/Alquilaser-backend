@@ -136,3 +136,29 @@ exports.returnBooking = async (req, res) => {
         res.status(400).send(error);
     }
 }
+
+exports.cancelBooking = async (req, res) => {
+    let bookingId = req.params.bookingId;
+    // let userId = req.user.user_id;
+
+
+    let booking = await Booking.findByPk(bookingId);
+
+    if (!booking) {
+        return res.status(404).send({message:"booking not found, try again later"});
+    }
+
+    // if (booking.user_id !== userId) {
+    //     return res.status(401).send({message:"You are not allowed to cancel this booking"});
+    // }
+
+    let startDate = dayjs(booking.start_date);
+
+    if (dayjs().isAfter(startDate.subtract(1, 'd'))) {
+        return res.status(401).send({message:"bookings must be canceled with more than one day of anticipation"})
+    }
+
+    await booking.destroy();
+    // TODO mandar mail
+    return res.status(200).send({message:"booking canceled successfully"});
+}
