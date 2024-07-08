@@ -27,6 +27,7 @@ sequelize.sync({ force: false })
 
 app.use(passport.initialize());
 require('./util/passport-config');
+const {startingBookingsCronjob} = require("./util/cronjobs");
 app.use(express.static(path.join(__dirname, '..', 'Alquilaser')));
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -57,3 +58,5 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+startingBookingsCronjob()
