@@ -132,6 +132,10 @@ exports.editListingService = async (req, res) => {
             }
         }
 
+        if (!title || !rate || !description || !availability) {
+            return res.status(401).send({message: "Missing field"})
+        }
+
         if (listing.user_id !== req.user.user_id) {
             return res.status(401).send({message: "Modifying listing not allowed"})
         }

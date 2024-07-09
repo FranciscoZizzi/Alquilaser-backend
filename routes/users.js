@@ -8,14 +8,14 @@ const { registerService,
   profileService, updateProfilePicService,
   getUserListingsService,
   getUserById,
-    updateUserDataService,
+  updateUserDataService,
   getUserBookingsService,
   getUserRentsService,
   changePasswordService,
   forgotPasswordService,
   resetPasswordService,
   emailValidationService, validateUserEmail,
-    addPhoneNumberService
+  addPhoneNumberService
 } = require('../services/userService');
 
 
