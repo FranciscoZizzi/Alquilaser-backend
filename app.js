@@ -17,7 +17,7 @@ const sequelize = require("./util/database")
 
 const { User, Listing, Image, Booking } = require('./models');
 
-sequelize.sync({ force: false })
+sequelize.sync({ force: true })
     .then(() => {
         console.log('Database synced successfully');
     })
@@ -27,6 +27,7 @@ sequelize.sync({ force: false })
 
 app.use(passport.initialize());
 require('./util/passport-config');
+const {startingBookingsCronjob, endingBookingsCronjob} = require("./util/cronjobs");
 app.use(express.static(path.join(__dirname, '..', 'Alquilaser')));
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -42,8 +43,8 @@ const PORT = process.env.PORT || 3000;
 process.on('SIGINT', async () => {
     console.log('Received SIGINT signal. Dropping tables and closing server...');
     try {
-        // await sequelize.drop();
-        // console.log('All tables dropped successfully.');
+        await sequelize.drop();
+        console.log('All tables dropped successfully.');
         await sequelize.close();
         console.log('Sequelize connection closed.');
         process.exit(0);
@@ -57,3 +58,6 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+startingBookingsCronjob()
+endingBookingsCronjob()

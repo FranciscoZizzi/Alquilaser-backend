@@ -56,7 +56,8 @@ const googleLogin = new GoogleStrategy(
                 email: email,
                 name: profile.displayName,
                 rating_count: 1,
-                rating_avg: 3.0
+                rating_avg: 3.0,
+                email_validated: true
             });
             const userToken = jwt.sign({ userId: newUser.user_id }, process.env.JWT_SECRET, { expiresIn: '24h' });
             return done(null, { user: newUser, token: userToken });
