@@ -17,7 +17,7 @@ const sequelize = require("./util/database")
 
 const { User, Listing, Image, Booking } = require('./models');
 
-sequelize.sync()
+sequelize.sync({ force: false })
     .then(() => {
         console.log('Database synced successfully');
     })
@@ -27,7 +27,7 @@ sequelize.sync()
 
 app.use(passport.initialize());
 require('./util/passport-config');
-const {startingBookingsCronjob, endingBookingsCronjob} = require("./util/cronjobs");
+const {bookedListingCronjob, startingBookingsCronjob, endingBookingsCronjob} = require("./util/cronjobs");
 app.use(express.static(path.join(__dirname, '..', 'Alquilaser')));
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -59,5 +59,6 @@ app.listen(PORT, () => {
 
 module.exports = app;
 
+bookedListingCronjob()
 startingBookingsCronjob()
 endingBookingsCronjob()

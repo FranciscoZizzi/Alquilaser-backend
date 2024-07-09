@@ -57,6 +57,29 @@ exports.endingBookingsCronjob = async () => {
 
     });
 }
+exports.bookedListingCronjob = async () => {
+    cron.schedule("0 0 * * *", async () => {
+        try {
+            const now = dayjs().format('YYYY-MM-DDT03:00:00.000[Z]');
+            let startingBookings = await Booking.findAll( {where:{start_date: now}})
+            for (const booking of startingBookings) {
+                let listing = await Listing.findByPk(booking.listing_id)
+                if(listing.listing_state === 'available') {
+                    try {
+                        await listing.update({
+                                listing_state: 'booked'
+                            }
+                        );
+                    } catch(error) {
+                        console.log(error);
+                    }
+                }
+            }
+        } catch (e) {
+            console.log(e)
+        }
+    });
+}
 //"0 0 * * *" it's supposed to run every day at 00:00
 /*
 0 0 * * *
