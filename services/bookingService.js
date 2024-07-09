@@ -15,6 +15,10 @@ exports.makeBooking = async (req, res) => {
     const userId = req.user.user_id;
     let user = await User.findByPk(userId);
 
+    if (!user.email_validated){
+        return res.status(405).send({message: "Validate your email address"});
+    }
+
     let listing = await Listing.findByPk(listingId);
     if (!listing) {
         return res.status(404).send("listing not found");
