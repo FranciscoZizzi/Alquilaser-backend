@@ -9,17 +9,7 @@ const User = require("../models/user");
 const Listing = require('../models/listing');
 
 exports.startingBookingsCronjob = async () => {
-    cron.schedule("* * * * *", async () => {
-        //"0 0 * * *" it's supposed to run every day at 00:00
-        /*
-        0 0 * * *
-        | | | | |
-        | | | | +--- Every day of the week
-        | | | +----- Every month
-        | | +------- Every day of the month
-        | +--------- At 0 hour (midnight)
-        +----------- At 0 minute
-        */
+    cron.schedule("0 0 * * *", async () => {
         try {
             const now = dayjs().format('YYYY-MM-DDT03:00:00.000[Z]');
             let startingBookings = await Booking.findAll( {where:{start_date: now}})
@@ -44,7 +34,7 @@ exports.startingBookingsCronjob = async () => {
 }
 
 exports.endingBookingsCronjob = async () => {
-    cron.schedule("* * * * *", async () => {
+    cron.schedule("0 0 * * *", async () => {
         try {
             const now = dayjs().format('YYYY-MM-DDT03:00:00.000[Z]');
             let startingBookings = await Booking.findAll( {where:{end_date: now}})
@@ -67,4 +57,13 @@ exports.endingBookingsCronjob = async () => {
 
     });
 }
-
+//"0 0 * * *" it's supposed to run every day at 00:00
+/*
+0 0 * * *
+| | | | |
+| | | | +--- Every day of the week
+| | | +----- Every month
+| | +------- Every day of the month
+| +--------- At 0 hour (midnight)
++----------- At 0 minute
+*/
