@@ -14,7 +14,8 @@ const { registerService,
   changePasswordService,
   forgotPasswordService,
   resetPasswordService,
-  emailValidationService, validateUserEmail
+  emailValidationService, validateUserEmail,
+    addPhoneNumberService
 } = require('../services/userService');
 
 
@@ -36,7 +37,13 @@ router.get(
     }),
     (req, res) => {
         const userWithToken = req.user;
-        const redirectUrl = `http://localhost:3002/store-token/${encodeURIComponent(userWithToken.token)}`;
+        let redirectUrl;
+
+        if (userWithToken.user.dataValues.phone) {
+            redirectUrl = `http://localhost:3002/store-token/${encodeURIComponent(userWithToken.token)}`;
+        } else {
+            redirectUrl = `http://localhost:3002/google-login/${encodeURIComponent(userWithToken.token)}`;
+        }
         res.redirect(redirectUrl);
     },
 );
@@ -68,5 +75,7 @@ router.put('/reset_password/:id/:token', resetPasswordService)
 router.post('/validate_email', emailValidationService)
 
 router.put('/confirm_email_validation/:id/:token', validateUserEmail)
+
+router.put('/add_phone_number', passport.authenticate('jwt', { session: false }), addPhoneNumberService)
 
 module.exports = router;

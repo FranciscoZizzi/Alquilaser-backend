@@ -17,7 +17,7 @@ const sequelize = require("./util/database")
 
 const { User, Listing, Image, Booking } = require('./models');
 
-sequelize.sync({ force: true })
+sequelize.sync()
     .then(() => {
         console.log('Database synced successfully');
     })
@@ -43,8 +43,8 @@ const PORT = process.env.PORT || 3000;
 process.on('SIGINT', async () => {
     console.log('Received SIGINT signal. Dropping tables and closing server...');
     try {
-        await sequelize.drop();
-        console.log('All tables dropped successfully.');
+        //await sequelize.drop();
+        //console.log('All tables dropped successfully.');
         await sequelize.close();
         console.log('Sequelize connection closed.');
         process.exit(0);

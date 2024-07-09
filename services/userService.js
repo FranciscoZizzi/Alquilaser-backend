@@ -571,3 +571,30 @@ exports.validateUserEmail = async (req,res) => {
     console.log("user email validated")
     return res.status(200).send({success: true});
 }
+
+
+exports.addPhoneNumberService = async (req,res) =>{
+    const user = await User.findOne({ where: { user_id: req.user.user_id } });
+    if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    const email = user.email;
+    const phoneNumber = req.body.phoneNumber
+    let existingUser = await User.findOne({where: {email}});
+    let response = {
+        success: true,
+        numberError: false,
+        message: ""
+    }
+    if (!phoneNumber) {
+        console.log("Phone number missing");
+        response.success = false;
+        response.numberError = !phoneNumber;
+        response.message = "Phone number missing";
+        return res.status(400).send(response);
+    }
+    await user.update({
+        phone: phoneNumber
+    });
+    return res.status(200).send({success: true});
+}
