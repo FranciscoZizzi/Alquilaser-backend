@@ -357,44 +357,36 @@ exports.updateUserDataService = async (req,res) => {
         return res.status(404).json({ error: 'User not found' });
     }
     const name = req.body.name;
-    const email = req.body.email;
     const phoneNumber = req.body.phoneNumber
-    let existingUser = await User.findOne({where: {email}});
     let response = {
         success: true,
-        emailError: false,
         usernameError: false,
         numberError: false,
         message: ""
     }
-    if (!name || !email || !phoneNumber) {
-        console.log("Name or email missing");
+    if(!phoneNumber && !name){
         response.success = false;
-        response.emailError = !email;
         response.usernameError = !name;
         response.numberError = !phoneNumber;
-        response.message = "Name, email or phone number missing";
+        response.message = "Fields cannot be empty";
         return res.status(400).send(response);
     }
-    let emailIsValid = /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email);
-    if(!emailIsValid) {
-        console.log("invalid email");
+    if(!phoneNumber){
         response.success = false;
-        response.emailError = true;
-        response.message = "Invalid email";
+        response.usernameError = !name;
+        response.numberError = !phoneNumber;
+        response.message = "Phone number cannot be empty";
         return res.status(400).send(response);
     }
-
-    if (existingUser != null && existingUser.user_id != user.user_id) {
-        console.log("Email already associated with an account");
+    if (!name) {
         response.success = false;
-        response.emailError = true;
-        response.message = "Email already associated with an account";
+        response.usernameError = !name;
+        response.numberError = !phoneNumber;
+        response.message = "Name cannot be empty";
         return res.status(400).send(response);
     }
     await user.update({
         name,
-        email,
         phone: phoneNumber
     });
     return res.status(200).send({success: true});
