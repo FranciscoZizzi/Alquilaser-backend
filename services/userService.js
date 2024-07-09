@@ -302,13 +302,13 @@ exports.profileService = async (req, res) => {
             bookingJson.owner = booking.Listing.User.name;
             return bookingJson;
         });
-
         return res.status(200).json({
             success: true,
             data: {
                 name: user.name,
                 phone: user.phone,
                 email: user.email,
+                email_validated: user.email_validated,
                 rating: user.rating_avg,
                 profile_pic: user.profile_pic,
                 bookings: bookingsWithOwner,
@@ -523,25 +523,34 @@ exports.resetPasswordService = async (req, res) => {
 }
 
 exports.emailValidationService = async (req,res) => {
-    console.log("Asdasdasddas")
     const email = req.body.email;
     try {
         const user = await User.findOne({where: {email}});
         if (!user) {
             return res.status(404).json({error: 'User not found'});
         }
-
-        const link = `http://localhost:3002/validate_email?userId=${user.user_id}`;
+        const secret = process.env.JWT_SECRET
+        const token = jwt.sign({ email: user.email, id: user.user_id }, secret, {
+            expiresIn: "5m",
+        });
+        const link = `http://localhost:3002/confirm_email_validation/${user.user_id}/${token}`;
         const subject = "Email validation"
         const text = `Validate your mail using the following link:\n\n ${link}`
         sendEmail(email, subject,text)
         console.log("Sent email")
         console.log(link);
+        return res.status(200).json({
+            success: true,
+            data: {
+                userId: user.user_id
+            }
+        })
     } catch (error){
         console.log(error);
-        res.json({ status: "Something Went Wrong" });
+        return res.json({ success: false, status: "Something Went Wrong" });
     }
 }
+
 exports.validateUserEmail = async (req,res) => {
     const user = await User.findOne({ where: { user_id: req.body.user_id } });
     if (!user) {
